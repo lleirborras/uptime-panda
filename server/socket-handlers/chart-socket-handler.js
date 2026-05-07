@@ -1,6 +1,7 @@
 const { checkLogin } = require("../util-server");
 const { UptimeCalculator } = require("../uptime-calculator");
 const { log } = require("../../src/util");
+const { socketError, UserFacingError } = require("../utils/socket-error");
 
 module.exports.chartSocketHandler = (socket) => {
     socket.on("getMonitorChartData", async (monitorID, period, callback) => {
@@ -10,7 +11,7 @@ module.exports.chartSocketHandler = (socket) => {
             log.debug("monitor", `Get Monitor Chart Data: ${monitorID} User ID: ${socket.userID}`);
 
             if (period == null) {
-                throw new Error("Invalid period.");
+                throw new UserFacingError("Invalid period.");
             }
 
             let uptimeCalculator = await UptimeCalculator.getUptimeCalculator(monitorID);
@@ -29,10 +30,7 @@ module.exports.chartSocketHandler = (socket) => {
                 data,
             });
         } catch (e) {
-            callback({
-                ok: false,
-                msg: e.message,
-            });
+            socketError(callback, e, "Failed to load monitor chart data");
         }
     });
 };
