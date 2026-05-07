@@ -107,7 +107,7 @@ describe("authedEvent — authenticated socket", () => {
 });
 
 describe("authedEvent — handler exceptions", () => {
-    test("handler throws → callback gets ok:false with the error message", async () => {
+    test("plain Error from handler → callback gets generic message (M-2 sanitization)", async () => {
         const socket = makeSocket({ userID: 1 });
         const handler = async () => {
             throw new Error("boom from handler");
@@ -116,15 +116,37 @@ describe("authedEvent — handler exceptions", () => {
         const acks = [];
         const callback = (ack) => acks.push(ack);
 
-        const wrapped = authedEvent(handler, { logNamespace: "unit-test" });
+        const wrapped = authedEvent(handler, {
+            logNamespace: "unit-test",
+            fallbackMsg: "Something went wrong",
+        });
 
-        // The wrapper must swallow the exception so a single bad handler
-        // can't take down the socket connection.
+        // Wrapper must swallow so a single bad handler can't take down the socket.
         await assert.doesNotReject(async () => wrapped(socket, callback));
 
         assert.strictEqual(acks.length, 1);
         assert.strictEqual(acks[0].ok, false);
-        assert.strictEqual(acks[0].msg, "boom from handler", "exception message surfaces in callback");
+        // Plain Error gets genericised — raw message must not leak.
+        assert.strictEqual(acks[0].msg, "Something went wrong", "internal exception is genericised");
+        assert.notStrictEqual(acks[0].msg, "boom from handler", "raw exception message must not leak");
+    });
+
+    test("UserFacingError from handler → callback receives the message verbatim", async () => {
+        const { UserFacingError } = require("../../server/utils/socket-error");
+        const socket = makeSocket({ userID: 1 });
+        const handler = async () => {
+            throw new UserFacingError("Username already taken");
+        };
+
+        const acks = [];
+        const callback = (ack) => acks.push(ack);
+
+        const wrapped = authedEvent(handler, { logNamespace: "unit-test" });
+        await wrapped(socket, callback);
+
+        assert.strictEqual(acks.length, 1);
+        assert.strictEqual(acks[0].ok, false);
+        assert.strictEqual(acks[0].msg, "Username already taken", "UserFacingError passes through unchanged");
     });
 
     test("handler throws without callback → wrapper still does not throw", async () => {
