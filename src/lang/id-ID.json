@@ -1027,7 +1027,7 @@
     "telegramServerUrlDescription": "Untuk menghapus batasan API bot Telegram atau mendapatkan akses di area yang diblokir (Seperti: China, Iran, dll.). Untuk informasi selengkapnya, klik {0}. Default: {1}",
     "Use HTML for custom E-mail body": "Gunakan HTML untuk body E-mail kustom",
     "Template plain text instead of using cards": "Templat teks biasa (alih-alih kartu)",
-    "issueWithGoogleChatOnAndroidHelptext": "Ini juga memungkinkan untuk menyiasati bug dari upstream, seperti pada {issuetackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Ini juga memungkinkan untuk menyiasati bug dari upstream, seperti pada {issueTrackerURL}",
     "smseagleMsgTtsAdvanced": "Panggilan teks-ke-ucapan (Lanjutan)",
     "smseagleDocs": "Dokumentasi dan Ketersediaan APIv2: {0}",
     "SpugPush Template Code": "Kode Templat",

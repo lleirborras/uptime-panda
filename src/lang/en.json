@@ -778,7 +778,7 @@
     "Copied to clipboard!": "Copied to clipboard!",
     "Failed to copy to clipboard": "Failed to copy to clipboard",
     "Template plain text instead of using cards": "Template plain text instead of using cards",
-    "issueWithGoogleChatOnAndroidHelptext": "This also allows to get around bugs upstream like {issuetackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "This also allows to get around bugs upstream like {issueTrackerURL}",
     "wayToGetKookBotToken": "Create application and get your bot token at {0}",
     "wayToGetKookGuildID": "Switch on 'Developer Mode' in Kook setting, and right click the guild to get its ID",
     "Guild ID": "Guild ID",
