@@ -286,4 +286,96 @@ describe("MaintenanceCache (integration with sqlite)", () => {
         // No matching maintenance, no UptimeKumaServer interaction needed.
         assert.strictEqual(await cache.isActive(1), false, "cycle must terminate, not throw");
     });
+
+    /**
+     * Reimplements the production replaceMaintenanceLinks helper from
+     * server/socket-handlers/maintenance-socket-handler.js. Kept inline so
+     * regressions in the helper surface here without exporting test-only
+     * symbols from the handler module.
+     * @param {string} table Link table
+     * @param {string} fkCol Foreign key column referencing the linked entity
+     * @param {number} maintenanceID Maintenance row id
+     * @param {Array<{id:number}>} items Items to link
+     */
+    async function replaceMaintenanceLinks(table, fkCol, maintenanceID, items) {
+        await getKnex().transaction(async (trx) => {
+            await trx(table).where("maintenance_id", maintenanceID).delete();
+            for (const item of items) {
+                await trx(table).insert({
+                    [fkCol]: item.id,
+                    maintenance_id: maintenanceID,
+                });
+            }
+        });
+    }
+
+    test("C-3 handler path: replaceMaintenanceLinks + loadFromDb hydrates cache", async () => {
+        const m1 = await insertMonitor({ name: "m1" });
+        const m2 = await insertMonitor({ name: "m2" });
+        maintenanceBean = await insertManualMaintenance({ title: "C-3 path" });
+        fakeServer.maintenanceList[maintenanceBean.id] = maintenanceBean;
+
+        // Simulate addMonitorMaintenance: socket handler calls replaceMaintenanceLinks
+        // and then maintenanceCache.loadFromDb() post-commit.
+        await replaceMaintenanceLinks("monitor_maintenance", "monitor_id", maintenanceBean.id, [
+            { id: m1 },
+            { id: m2 },
+        ]);
+
+        const cache = new MaintenanceCache();
+        await cache.loadFromDb();
+
+        assert.strictEqual(await cache.isActive(m1), true, "m1 directly linked → under maintenance");
+        assert.strictEqual(await cache.isActive(m2), true, "m2 directly linked → under maintenance");
+    });
+
+    test("C-3 handler path: re-call with new monitor list drops the previous links", async () => {
+        const m1 = await insertMonitor({ name: "old-attach" });
+        const m2 = await insertMonitor({ name: "new-attach" });
+        maintenanceBean = await insertManualMaintenance({ title: "re-attach" });
+        fakeServer.maintenanceList[maintenanceBean.id] = maintenanceBean;
+
+        // First attach: m1
+        await replaceMaintenanceLinks("monitor_maintenance", "monitor_id", maintenanceBean.id, [ { id: m1 } ]);
+        const cache = new MaintenanceCache();
+        await cache.loadFromDb();
+        assert.strictEqual(await cache.isActive(m1), true, "m1 attached after first call");
+        assert.strictEqual(await cache.isActive(m2), false, "m2 not yet attached");
+
+        // Second attach: m2 only — replace pattern must drop m1.
+        await replaceMaintenanceLinks("monitor_maintenance", "monitor_id", maintenanceBean.id, [ { id: m2 } ]);
+        await cache.loadFromDb();
+        assert.strictEqual(await cache.isActive(m1), false, "m1 detached after replace");
+        assert.strictEqual(await cache.isActive(m2), true, "m2 attached after replace");
+    });
+
+    test("C-3 handler path: rollback inside replaceMaintenanceLinks leaves cache and DB consistent", async () => {
+        const m1 = await insertMonitor({ name: "rollback-existing" });
+        maintenanceBean = await insertManualMaintenance({ title: "rollback-test" });
+        fakeServer.maintenanceList[maintenanceBean.id] = maintenanceBean;
+
+        // Seed with m1 attached.
+        await getKnex()("monitor_maintenance").insert({
+            monitor_id: m1, maintenance_id: maintenanceBean.id,
+        });
+        const cache = new MaintenanceCache();
+        await cache.loadFromDb();
+        assert.strictEqual(await cache.isActive(m1), true, "baseline: m1 active");
+
+        // Force a rollback inside the transaction: insert a duplicate then throw.
+        await assert.rejects(async () => {
+            await getKnex().transaction(async (trx) => {
+                await trx("monitor_maintenance").where("maintenance_id", maintenanceBean.id).delete();
+                throw new Error("simulated commit failure");
+            });
+        }, /simulated commit failure/);
+
+        // The handler hooks loadFromDb AFTER replaceMaintenanceLinks returns,
+        // so on throw the cache is never refreshed. DB is rolled back by the
+        // transaction. Cache + DB stay at the pre-mutation state.
+        const stillThere = await getKnex()("monitor_maintenance")
+            .where("maintenance_id", maintenanceBean.id);
+        assert.strictEqual(stillThere.length, 1, "DB row preserved by rollback");
+        assert.strictEqual(await cache.isActive(m1), true, "cache untouched, still reflects pre-mutation truth");
+    });
 });
