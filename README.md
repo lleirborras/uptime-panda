@@ -1,21 +1,22 @@
 <div align="center" width="100%">
-    <img src="./public/icon.svg" width="128" alt="Uptime Kuma Logo" />
+    <img src="./public/icon.svg" width="128" alt="Uptime Panda Logo" />
 </div>
 
-# Uptime Kuma
+# Uptime Panda
 
-Uptime Kuma is an easy-to-use self-hosted monitoring tool.
+Uptime Panda is a self-hosted monitoring tool — a fork of [Uptime Kuma](https://github.com/louislam/uptime-kuma) that adds a real ORM layer (Objection.js + Knex) and PostgreSQL as a first-class database backend, alongside SQLite and MariaDB/MySQL.
 
-<a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/stars/louislam/uptime-kuma?style=flat" /></a> <a target="_blank" href="https://hub.docker.com/r/louislam/uptime-kuma"><img src="https://img.shields.io/docker/pulls/louislam/uptime-kuma" /></a> <a target="_blank" href="https://hub.docker.com/r/louislam/uptime-kuma"><img src="https://img.shields.io/docker/v/louislam/uptime-kuma/2?label=docker%20image%20ver." /></a> <a target="_blank" href="https://github.com/louislam/uptime-kuma"><img src="https://img.shields.io/github/last-commit/louislam/uptime-kuma" /></a> <a target="_blank" href="https://opencollective.com/uptime-kuma"><img src="https://opencollective.com/uptime-kuma/total/badge.svg?label=Open%20Collective%20Backers&color=brightgreen" /></a>
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/louislam?label=GitHub%20Sponsors)](https://github.com/sponsors/louislam) <a href="https://weblate.kuma.pet/projects/uptime-kuma/uptime-kuma/">
-<img src="https://weblate.kuma.pet/widgets/uptime-kuma/-/svg-badge.svg" alt="Translation status" />
-</a>
+> 🐼 **What's the difference?** Functionally a superset. Same features, same look, plus PostgreSQL support, snake_case column reads end-to-end, and a Dialect-strategy DB layer. See [`docs/DATABASE.md`](docs/DATABASE.md).
+>
+> 🐻 **Where credit's due.** All the original work is by [@louislam](https://github.com/louislam) and the upstream Uptime Kuma contributors. Uptime Panda is a downstream fork — bug reports about features that exist upstream should go there too.
+
+<a target="_blank" href="https://github.com/lleirborras/uptime-panda"><img src="https://img.shields.io/github/stars/lleirborras/uptime-panda?style=flat" /></a> <a target="_blank" href="https://github.com/lleirborras/uptime-panda"><img src="https://img.shields.io/github/last-commit/lleirborras/uptime-panda" /></a>
 
 <img src="https://user-images.githubusercontent.com/1336778/212262296-e6205815-ad62-488c-83ec-a5b0d0689f7c.jpg" width="700" alt="Uptime Kuma Dashboard Screenshot" />
 
 ## 🥔 Live Demo
 
-Try it!
+Upstream's hosted demo (same UI):
 
 Demo Server (Location: Frankfurt - Germany): <https://demo.kuma.pet/start-demo>
 

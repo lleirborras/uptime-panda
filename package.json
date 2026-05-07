@@ -1,10 +1,10 @@
 {
-    "name": "uptime-kuma",
+    "name": "uptime-panda",
     "version": "2.3.2",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/louislam/uptime-kuma.git"
+        "url": "https://github.com/lleirborras/uptime-panda.git"
     },
     "engines": {
         "node": ">= 20.4.0"
