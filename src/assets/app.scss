@@ -1,9 +1,14 @@
 @import "vars.scss";
 @import "multiselect.scss";
 @import "node_modules/bootstrap/scss/bootstrap";
+// Density / typography overrides on top of Bootstrap. Loaded last so it wins
+// the cascade against Bootstrap's defaults but stays beatable by component
+// `<style scoped>` blocks. See _compact.scss for the rationale per rule.
+@import "_compact.scss";
 
 #app {
     font-family:
+        "Inter",
         "Twemoji Country Flags",
         BlinkMacSystemFont,
         segoe ui,
@@ -16,14 +21,7 @@
         segoe ui emoji,
         segoe ui symbol,
         noto color emoji;
-}
-
-h1 {
-    font-size: 32px;
-}
-
-h2 {
-    font-size: 26px;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";  // nicer Inter alternates if available
 }
 
 textarea.form-control {
