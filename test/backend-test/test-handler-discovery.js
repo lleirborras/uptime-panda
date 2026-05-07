@@ -145,6 +145,7 @@ describe("Socket handler auto-discovery", () => {
             "proxy-socket-handler.js",
             "remote-browser-socket-handler.js",
             "status-page-socket-handler.js",
+            "tag-socket-handler.js",
         ];
         for (const name of expected) {
             assert.ok(files.includes(name), `expected handler ${name} to be discovered`);
