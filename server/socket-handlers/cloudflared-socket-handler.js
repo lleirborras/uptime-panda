@@ -1,8 +1,8 @@
-const { checkLogin, setSetting, setting, doubleCheckPassword } = require("../util-server");
+const { setSetting, setting, doubleCheckPassword } = require("../util-server");
 const { CloudflaredTunnel } = require("node-cloudflared-tunnel");
 const { UptimeKumaServer } = require("../uptime-kuma-server");
 const { log } = require("../../src/util");
-const { socketError } = require("../utils/socket-error");
+const { onAuthed } = require("../utils/authed-event");
 const io = UptimeKumaServer.getInstance().io;
 
 const prefix = "cloudflared_";
@@ -34,63 +34,52 @@ cloudflared.error = (errorMessage) => {
  * @returns {void}
  */
 module.exports.cloudflaredSocketHandler = (socket) => {
-    socket.on(prefix + "join", async () => {
-        try {
-            checkLogin(socket);
-            socket.join("cloudflared");
-            io.to(socket.userID).emit(prefix + "installed", cloudflared.checkInstalled());
-            io.to(socket.userID).emit(prefix + "running", cloudflared.running);
-            io.to(socket.userID).emit(prefix + "token", await setting("cloudflaredTunnelToken"));
-        } catch (error) {
-            log.error("cloudflared", "Error in join handler: " + error.message);
-        }
-    });
+    onAuthed(socket, prefix + "join", async (socket) => {
+        socket.join("cloudflared");
+        io.to(socket.userID).emit(prefix + "installed", cloudflared.checkInstalled());
+        io.to(socket.userID).emit(prefix + "running", cloudflared.running);
+        io.to(socket.userID).emit(prefix + "token", await setting("cloudflaredTunnelToken"));
+    }, { logNamespace: "cloudflared",
+        fallbackMsg: "Failed to join cloudflared room" });
 
-    socket.on(prefix + "leave", async () => {
-        try {
-            checkLogin(socket);
-            socket.leave("cloudflared");
-        } catch (error) {
-            log.error("cloudflared", "Error in leave handler: " + error.message);
-        }
-    });
+    onAuthed(socket, prefix + "leave", async (socket) => {
+        socket.leave("cloudflared");
+    }, { logNamespace: "cloudflared",
+        fallbackMsg: "Failed to leave cloudflared room" });
 
-    socket.on(prefix + "start", async (token) => {
-        try {
-            checkLogin(socket);
-            if (token && typeof token === "string") {
-                await setSetting("cloudflaredTunnelToken", token);
-                cloudflared.token = token;
-            } else {
-                cloudflared.token = null;
-            }
-            cloudflared.start();
-        } catch (error) {
-            log.error("cloudflared", "Error in start handler: " + error.message);
+    onAuthed(socket, prefix + "start", async (socket, token) => {
+        if (token && typeof token === "string") {
+            await setSetting("cloudflaredTunnelToken", token);
+            cloudflared.token = token;
+        } else {
+            cloudflared.token = null;
         }
-    });
+        cloudflared.start();
+    }, { logNamespace: "cloudflared",
+        fallbackMsg: "Failed to start cloudflared" });
 
-    socket.on(prefix + "stop", async (currentPassword, callback) => {
+    onAuthed(socket, prefix + "stop", async (socket, currentPassword, callback) => {
         try {
-            checkLogin(socket);
             const disabledAuth = await setting("disableAuth");
             if (!disabledAuth) {
                 await doubleCheckPassword(socket, currentPassword);
             }
             cloudflared.stop();
         } catch (error) {
-            socketError(callback, error, "Failed to stop cloudflared tunnel");
+            // Preserve original behaviour: only the error path invokes the
+            // callback; success path is silent (UI relies on `running` push).
+            callback({
+                ok: false,
+                msg: error.message,
+            });
         }
-    });
+    }, { logNamespace: "cloudflared",
+        fallbackMsg: "Failed to stop cloudflared" });
 
-    socket.on(prefix + "removeToken", async () => {
-        try {
-            checkLogin(socket);
-            await setSetting("cloudflaredTunnelToken", "");
-        } catch (error) {
-            log.error("cloudflared", "Error in removeToken handler: " + error.message);
-        }
-    });
+    onAuthed(socket, prefix + "removeToken", async () => {
+        await setSetting("cloudflaredTunnelToken", "");
+    }, { logNamespace: "cloudflared",
+        fallbackMsg: "Failed to remove cloudflared token" });
 };
 
 /**
