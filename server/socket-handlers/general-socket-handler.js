@@ -6,6 +6,7 @@ const { games } = require("gamedig");
 const { testChrome } = require("../monitor-types/real-browser-monitor-type");
 const fsAsync = require("fs").promises;
 const path = require("path");
+const { socketError, UserFacingError } = require("../utils/socket-error");
 
 /**
  * Get a game list via GameDig
@@ -61,10 +62,7 @@ module.exports.generalSocketHandler = (socket, server) => {
                 gameList: getGameList(),
             });
         } catch (e) {
-            callback({
-                ok: false,
-                msg: e.message,
-            });
+            socketError(callback, e, "Failed to load game list");
         }
     });
 
@@ -84,16 +82,10 @@ module.exports.generalSocketHandler = (socket, server) => {
                     });
                 })
                 .catch((e) => {
-                    callback({
-                        ok: false,
-                        msg: e.message,
-                    });
+                    socketError(callback, e, "Failed to test Chromium executable");
                 });
         } catch (e) {
-            callback({
-                ok: false,
-                msg: e.message,
-            });
+            socketError(callback, e, "Failed to test Chromium executable");
         }
     });
 
@@ -101,13 +93,10 @@ module.exports.generalSocketHandler = (socket, server) => {
         try {
             checkLogin(socket);
             if (!/^[a-z-]+$/.test(language)) {
-                throw new Error("Invalid language");
+                throw new UserFacingError("Invalid language");
             }
         } catch (e) {
-            callback({
-                ok: false,
-                msg: e.message,
-            });
+            socketError(callback, e, "Failed to load push example");
             return;
         }
 

@@ -4,6 +4,7 @@ const { RemoteBrowser } = require("../remote-browser");
 
 const { log } = require("../../src/util");
 const { testRemoteBrowser } = require("../monitor-types/real-browser-monitor-type");
+const { socketError } = require("../utils/socket-error");
 
 /**
  * Handlers for docker hosts
@@ -25,10 +26,7 @@ module.exports.remoteBrowserSocketHandler = (socket) => {
                 id: remoteBrowserBean.id,
             });
         } catch (e) {
-            callback({
-                ok: false,
-                msg: e.message,
-            });
+            socketError(callback, e, "Failed to save remote browser");
         }
     });
 
@@ -45,10 +43,7 @@ module.exports.remoteBrowserSocketHandler = (socket) => {
                 msgi18n: true,
             });
         } catch (e) {
-            callback({
-                ok: false,
-                msg: e.message,
-            });
+            socketError(callback, e, "Failed to delete remote browser");
         }
     });
 
@@ -69,11 +64,7 @@ module.exports.remoteBrowserSocketHandler = (socket) => {
             });
         } catch (e) {
             log.error("remoteBrowser", e);
-
-            callback({
-                ok: false,
-                msg: e.message,
-            });
+            socketError(callback, e, "Failed to test remote browser connection");
         }
     });
 };

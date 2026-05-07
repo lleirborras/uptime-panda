@@ -20,6 +20,7 @@ const { Prometheus } = require("../prometheus");
 const Database = require("../database");
 const { UptimeCalculator } = require("../uptime-calculator");
 const { Settings } = require("../settings");
+const { UserFacingError } = require("../utils/socket-error");
 
 let router = express.Router();
 
@@ -58,14 +59,14 @@ router.all("/api/push/:pushToken", async (request, response) => {
         // Fits safely in both BIGINT and FLOAT(20,2)
         const MAX_PING_MS = 100000000000;
         if (ping !== null && (ping < 0 || ping > MAX_PING_MS)) {
-            throw new Error(`Invalid ping value. Must be between 0 and ${MAX_PING_MS} ms.`);
+            throw new UserFacingError(`Invalid ping value. Must be between 0 and ${MAX_PING_MS} ms.`);
         }
 
         let monitor = await Monitor.query().where({ push_token: pushToken,
             active: true }).first();
 
         if (!monitor) {
-            throw new Error("Monitor not found or not active.");
+            throw new UserFacingError("Monitor not found or not active.");
         }
 
         const previousHeartbeat = await Monitor.getPreviousHeartbeat(monitor.id);
@@ -141,10 +142,18 @@ router.all("/api/push/:pushToken", async (request, response) => {
             ok: true,
         });
     } catch (e) {
-        response.status(404).json({
-            ok: false,
-            msg: e.message,
-        });
+        if (e && e.isUserFacing) {
+            response.status(404).json({
+                ok: false,
+                msg: e.message,
+            });
+        } else {
+            log.error("router", e);
+            response.status(500).json({
+                ok: false,
+                msg: "Internal server error",
+            });
+        }
     }
 });
 

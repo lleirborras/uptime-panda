@@ -1,5 +1,6 @@
 const { checkLogin } = require("../util-server");
 const Database = require("../database");
+const { socketError } = require("../utils/socket-error");
 
 /**
  * Handlers for database
@@ -16,10 +17,7 @@ module.exports.databaseSocketHandler = (socket) => {
                 size: await Database.getSize(),
             });
         } catch (error) {
-            callback({
-                ok: false,
-                msg: error.message,
-            });
+            socketError(callback, error, "Failed to get database size");
         }
     });
 
@@ -31,10 +29,7 @@ module.exports.databaseSocketHandler = (socket) => {
                 ok: true,
             });
         } catch (error) {
-            callback({
-                ok: false,
-                msg: error.message,
-            });
+            socketError(callback, error, "Failed to shrink database");
         }
     });
 };

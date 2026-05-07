@@ -2,6 +2,7 @@ const { checkLogin, setSetting, setting, doubleCheckPassword } = require("../uti
 const { CloudflaredTunnel } = require("node-cloudflared-tunnel");
 const { UptimeKumaServer } = require("../uptime-kuma-server");
 const { log } = require("../../src/util");
+const { socketError } = require("../utils/socket-error");
 const io = UptimeKumaServer.getInstance().io;
 
 const prefix = "cloudflared_";
@@ -78,10 +79,7 @@ module.exports.cloudflaredSocketHandler = (socket) => {
             }
             cloudflared.stop();
         } catch (error) {
-            callback({
-                ok: false,
-                msg: error.message,
-            });
+            socketError(callback, error, "Failed to stop cloudflared tunnel");
         }
     });
 

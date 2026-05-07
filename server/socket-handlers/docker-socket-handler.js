@@ -2,6 +2,7 @@ const { sendDockerHostList } = require("../client");
 const { checkLogin } = require("../util-server");
 const { DockerHost } = require("../docker");
 const { log } = require("../../src/util");
+const { socketError } = require("../utils/socket-error");
 
 /**
  * Handlers for docker hosts
@@ -23,10 +24,7 @@ module.exports.dockerSocketHandler = (socket) => {
                 id: dockerHostBean.id,
             });
         } catch (e) {
-            callback({
-                ok: false,
-                msg: e.message,
-            });
+            socketError(callback, e, "Failed to save docker host");
         }
     });
 
@@ -43,10 +41,7 @@ module.exports.dockerSocketHandler = (socket) => {
                 msgi18n: true,
             });
         } catch (e) {
-            callback({
-                ok: false,
-                msg: e.message,
-            });
+            socketError(callback, e, "Failed to delete docker host");
         }
     });
 
@@ -69,11 +64,7 @@ module.exports.dockerSocketHandler = (socket) => {
             });
         } catch (e) {
             log.error("docker", e);
-
-            callback({
-                ok: false,
-                msg: e.message,
-            });
+            socketError(callback, e, "Failed to test docker host connection");
         }
     });
 };
