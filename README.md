@@ -20,7 +20,7 @@ Upstream's hosted demo (same UI):
 
 Demo Server (Location: Frankfurt - Germany): <https://demo.kuma.pet/start-demo>
 
-It is a temporary live demo, all data will be deleted after 10 minutes. Sponsored by [Uptime Kuma Sponsors](https://github.com/louislam/uptime-kuma#%EF%B8%8F-sponsors).
+It is a temporary live demo, all data will be deleted after 10 minutes.
 
 ## ⭐ Features
 
@@ -127,12 +127,6 @@ Please read:
 I will assign requests/issues to the next milestone.
 
 <https://github.com/louislam/uptime-kuma/milestones>
-
-## ❤️ Sponsors
-
-Thank you so much! (GitHub Sponsors will be updated manually. OpenCollective sponsors will be updated automatically, the list will be cached by GitHub though. It may need some time to be updated)
-
-<img src="https://uptime.kuma.pet/sponsors?v=6" alt="Uptime Kuma Sponsors" />
 
 ## 🖼 More Screenshots
 
