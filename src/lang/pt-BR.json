@@ -1101,7 +1101,7 @@
     "Path": "Caminho",
     "mqttWebsocketPathInvalid": "Use um formato de caminho WebSocket válido",
     "mqttHostnameTip": "Por favor, use este formato {hostnameFormat}",
-    "issueWithGoogleChatOnAndroidHelptext": "Isso também permite contornar bugs no upstream, como {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Isso também permite contornar bugs no upstream, como {issuetackerURL}",
     "Template plain text instead of using cards": "Modelo de texto simples em vez de usar cartões",
     "Clear All Events": "Limpar todos os eventos",
     "Events cleared successfully": "Eventos limpos com sucesso.",

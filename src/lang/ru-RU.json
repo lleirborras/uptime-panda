@@ -1052,7 +1052,7 @@
     "tagNameExists": "Тег с таким именем уже существует. Выберите его из списка или используйте другое имя.",
     "Use HTML for custom E-mail body": "Используйте HTML для пользовательского текста E-Mail",
     "Template plain text instead of using cards": "Шаблон простого текста вместо использования карт",
-    "issueWithGoogleChatOnAndroidHelptext": "Это также позволяет обойти баги входящего потока, как {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Это также позволяет обойти баги входящего потока, как {issuetackerURL}",
     "smseagleGroupV2": "Идентификатор группы Phonebook(s)",
     "smseagleApiv2": "APIv2 (рекомендовано для новых интеграций)",
     "smseagleApiv1": "APIv1 (для существующих проектов и обратной совместимости)",

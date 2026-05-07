@@ -218,7 +218,7 @@
     "invertKeywordDescription": "Schaug liaba, dass des Stichwortl ned do is, ois dass 's do is.",
     "octopushSMSSender": "SMS-Absender: 3 bis 11 Zeichn (Buachstobm, Zoin und Leerzeichn)",
     "wahaChatId": "Chat-ID (Telefonnumma / Kontakt-ID / Gruppn-ID)",
-    "issueWithGoogleChatOnAndroidHelptext": "Damit konnst aa Fehlers in da Software weida obm umgeh, so wia bei {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Damit konnst aa Fehlers in da Software weida obm umgeh, so wia bei {issuetackerURL}",
     "Add Tags": "Kennzeichnunga dazuafügn",
     "color": "Farb",
     "ignoreSecWebsocketAcceptHeaderDescription": "Erlaubt am Server, dass a ned mid am Sec-WebSocket-Accept-Header antword, wenn da Websocket-Upgrade hinhaut.",

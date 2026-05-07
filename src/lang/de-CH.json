@@ -1105,7 +1105,7 @@
     "mqttWebsocketPathInvalid": "Verwende ein gültiges WebSocket-Pfadformat",
     "mqttHostnameTip": "Verwende dieses Format {hostnameFormat}",
     "Template plain text instead of using cards": "Textvorlage anstelle von Karten",
-    "issueWithGoogleChatOnAndroidHelptext": "Dies ermöglicht auch die Umgehung von Fehlern im Vorfeld wie {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Dies ermöglicht auch die Umgehung von Fehlern im Vorfeld wie {issuetackerURL}",
     "Clear All Events": "Alle Ereignisse löschen",
     "clearAllEventsMsg": "Möchtest du wirklich alle Ereignisse löschen?",
     "Events cleared successfully": "Ereignisse erfolgreich gelöscht.",

@@ -1105,7 +1105,7 @@
     "mqttWebsocketPathExplanation": "Putanja WebSocketa za MQTT preko WebSocket veza (npr. /mqtt)",
     "mqttWebsocketPathInvalid": "Koristiti valjani format putanje WebSocketa",
     "Template plain text instead of using cards": "Predložak običnim tekstom umjesto korištenja kartica",
-    "issueWithGoogleChatOnAndroidHelptext": "Ovo omogućuje izbjegavanje grešaka poput {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Ovo omogućuje izbjegavanje grešaka poput {issuetackerURL}",
     "clearAllEventsMsg": "Jeste li sigurni da želite obrisati sve događaje?",
     "No monitors found": "Nema pronađenih monitora.",
     "Could not clear events": "Nije bilo moguće obrisati {failed} od {total} događaja",

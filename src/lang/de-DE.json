@@ -1105,7 +1105,7 @@
     "mqttWebsocketPathExplanation": "WebSocket-Pfad für MQTT-über-WebSocket-Verbindungen (z. B. /mqtt)",
     "mqttHostnameTip": "Bitte dieses Format verwenden: {hostnameFormat}",
     "Template plain text instead of using cards": "Klartext-Vorlage statt Karten verwenden",
-    "issueWithGoogleChatOnAndroidHelptext": "Dies hilft auch, Upstream-Bugs wie {issueTrackerURL} zu umgehen",
+    "issueWithGoogleChatOnAndroidHelptext": "Dies hilft auch, Upstream-Bugs wie {issuetackerURL} zu umgehen",
     "clearAllEventsMsg": "Möchtest du wirklich alle Ereignisse löschen?",
     "Events cleared successfully": "Ereignisse erfolgreich gelöscht.",
     "No monitors found": "Keine Monitore gefunden.",

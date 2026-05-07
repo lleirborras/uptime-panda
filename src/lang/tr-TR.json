@@ -1114,7 +1114,7 @@
     "supportBaleChatID": "Destek Direkt Mesaj / Grup / Kanalın Mesaj ID'si",
     "Events cleared successfully": "Etkinlikler başarıyla temizlendi.",
     "No monitors found": "Monitör bulunamadı.",
-    "issueWithGoogleChatOnAndroidHelptext": "Bu ayrıca {issueTrackerURL} gibi üst akıştaki hataları aşmayı sağlar",
+    "issueWithGoogleChatOnAndroidHelptext": "Bu ayrıca {issuetackerURL} gibi üst akıştaki hataları aşmayı sağlar",
     "Number of retry attempts if webhook fails": "Webhook başarısız olursa yeniden deneme sayısı (her 60-180 saniyede bir).",
     "Maximum Retries": "Maksimum Yeniden Deneme",
     "wayToGetClickSMSIRTemplateID": "Şablonunuz {uptkumaalert} alanını içermelidir. {here} üzerinden yeni bir şablon oluşturabilirsiniz.",

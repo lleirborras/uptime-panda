@@ -270,7 +270,7 @@
     "Device": "ডিভাইস",
     "pushoverMessageTtl": "বার্তার TTL (সেকেন্ড)",
     "Check octopush prices": "Octopush এর দাম যাচাই করুন {0}.",
-    "issueWithGoogleChatOnAndroidHelptext": "এটি {issueTrackerURL}-এর মতো আপস্ট্রিম বাগগুলো এড়িয়ে যেতে সাহায্য করে",
+    "issueWithGoogleChatOnAndroidHelptext": "এটি {issuetackerURL}-এর মতো আপস্ট্রিম বাগগুলো এড়িয়ে যেতে সাহায্য করে",
     "wayToGetKookBotToken": "অ্যাপ্লিকেশন তৈরি করুন এবং আপনার বট টোকেন {0} থেকে সংগ্রহ করুন",
     "wayToGetKookGuildID": "Kook সেটিংসে ‘ডেভেলপার মোড’ চালু করুন, তারপর গিল্ডে ডান ক্লিক করে তার আইডি সংগ্রহ করুন",
     "GoogleChat": "গুগল চ্যাট (শুধুমাত্র গুগল ওয়ার্কস্পেসের জন্য)",

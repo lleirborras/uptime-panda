@@ -1109,7 +1109,7 @@
     "clearAllEventsMsg": "您确定要删除所有事件吗？",
     "Clear All Events": "清除所有事件",
     "Events cleared successfully": "事件已成功清除。",
-    "issueWithGoogleChatOnAndroidHelptext": "这也能规避上游的类似 {issueTrackerURL} 的 bug",
+    "issueWithGoogleChatOnAndroidHelptext": "这也能规避上游的类似 {issuetackerURL} 的 bug",
     "Template plain text instead of using cards": "使用纯文本模板而非卡片",
     "evolutionInstanceName": "实例名称",
     "evolutionRecipient": "手机号码 / 联系人 ID / 组 ID",

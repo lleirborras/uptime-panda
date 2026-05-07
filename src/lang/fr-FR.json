@@ -1105,7 +1105,7 @@
     "mqttWebsocketPathInvalid": "Veuillez utiliser un format de chemin WebSocket valide",
     "mqttHostnameTip": "Veuillez utiliser ce format {hostnameFormat}",
     "Template plain text instead of using cards": "Modèle en texte brut au lieu d'utiliser des cartes",
-    "issueWithGoogleChatOnAndroidHelptext": "Cela permet également de contourner les bugs en amont comme {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Cela permet également de contourner les bugs en amont comme {issuetackerURL}",
     "clearAllEventsMsg": "Êtes-vous sûr de vouloir supprimer tous les événements pour toutes les sondes ? Cette action supprime définitivement les données de messages associées et ne peut être annulée.",
     "Clear All Events": "Effacer tous les événements",
     "Events cleared successfully": "Événements effacés avec succès.",

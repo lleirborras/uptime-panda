@@ -1145,7 +1145,7 @@
     "certHostnameMismatch": "Certifikatets värdnamn matchar inte övervakarens URL.",
     "telegramTemplateFormatDescription": "Telegram tillåter användning av olika markupspråk för meddelanden, se Telegram {0} för specifika detaljer.",
     "deleteChildrenMonitors": "Ta även bort de direkta underordnade övervakarna och dess underordnade om det finns några | Ta även bort alla {count} direkta underordnade övervakare och deras underordnade om det finns några",
-    "issueWithGoogleChatOnAndroidHelptext": "Detta gör det också möjligt att kringgå buggar uppströms som {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Detta gör det också möjligt att kringgå buggar uppströms som {issuetackerURL}",
     "twilloMessagingServiceSIDHelptext": "Ange ditt meddelandetjänst-SID här om du använder {twillo_messaging_service_help_link} för att hantera avsändare och funktioner",
     "twilioApiKeyHelptext": "API-nyckeln är valfri men rekommenderas. Du kan ange antingen konto-SID och AuthToken från TwilioConsole-sidan eller konto-SID och paret API-nyckel och API-nyckelhemlighet",
     "evolutionRecipient": "Telefonnummer / Kontakt-ID / Grupp-ID",

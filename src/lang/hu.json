@@ -1087,7 +1087,7 @@
     "Enter a list of mobile": "Adjon meg egy mobilszám listát",
     "smseagleDocs": "Ellenőrizze a dokumentációt vagy az APIv2 elérhetőségét: {0}",
     "Template plain text instead of using cards": "Sima szöveg sablon használata kártyák helyett",
-    "issueWithGoogleChatOnAndroidHelptext": "Ez lehetővé teszi a hibák, például a {issueTrackerURL} megkerülését is",
+    "issueWithGoogleChatOnAndroidHelptext": "Ez lehetővé teszi a hibák, például a {issuetackerURL} megkerülését is",
     "descriptionHelpText": "A belső irányítópulton látható. A Markdown engedélyezett és a megjelenítés előtt szanitizálva van (megőrzi a szóközöket és a behúzást).",
     "ntfyPriorityHelptextPriorityHigherThanDown": "A normál prioritásnak magasabbnak kell lennie, mint a(z) {0} prioritás. A(z) {1} prioritás magasabb, mint a(z) {0} prioritás {2}",
     "auto-select": "Automatikus kiválasztás",

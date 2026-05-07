@@ -900,7 +900,7 @@
     "Optional: Space separated list of scopes": "Voliteľné: Zoznam rozsahov oddelených medzerami",
     "Template Format": "Formát šablóny",
     "Template plain text instead of using cards": "Šablóna obyčajného textu namiesto toho, aby sa použili karty",
-    "issueWithGoogleChatOnAndroidHelptext": "To tiež umožňuje obísť chyby v upstreamoch, ako napríklad {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "To tiež umožňuje obísť chyby v upstreamoch, ako napríklad {issuetackerURL}",
     "noOrBadCertificate": "Žiadny/neplatný certifikát",
     "cacheBusterParam": "Pridať parameter {0}",
     "Message format": "Formát správy",

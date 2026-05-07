@@ -1105,7 +1105,7 @@
     "mqttWebSocketPath": "MQTT WebSocket cesta",
     "mqttWebsocketPathExplanation": "WebSocket cesta pro MQTT prostřednictvím WebSocket spojení (např. /mqtt)",
     "Template plain text instead of using cards": "Šablona prostého textu namísto použití karet",
-    "issueWithGoogleChatOnAndroidHelptext": "Tím se můžete rovněž vyhnout chybám v upstreamu jako je {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Tím se můžete rovněž vyhnout chybám v upstreamu jako je {issuetackerURL}",
     "clearAllEventsMsg": "Opravdu chcete odstranit všechny události ze všech dohledů? Tím dojde k trvalému smazání souvisejících dat zpráv a tento úkon nelze vrátit zpět.",
     "Events cleared successfully": "Události byly vymazány.",
     "No monitors found": "Nebyl nalezen žádný dohled.",

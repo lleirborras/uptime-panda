@@ -1112,7 +1112,7 @@
     "No monitors found": "هیچ پایشگری پیدا نشد.",
     "Could not clear events": "نتوانستیم {failed}/{total} رویداد را پاک کنیم",
     "Template plain text instead of using cards": "استفاده از متن ساده به‌جای کارت‌ها در قالب",
-    "issueWithGoogleChatOnAndroidHelptext": "این همچنین امکان دور زدن باگ‌های بالادست مانند {issueTrackerURL} را فراهم می‌کند",
+    "issueWithGoogleChatOnAndroidHelptext": "این همچنین امکان دور زدن باگ‌های بالادست مانند {issuetackerURL} را فراهم می‌کند",
     "Mention User List": "ذکر فهرست شناسه کاربر (User ID List)",
     "Dingtalk Mobile List": "لیست موبایل",
     "Dingtalk User List": "لیست شناسه کاربر (User ID)",

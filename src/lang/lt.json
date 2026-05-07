@@ -1069,7 +1069,7 @@
     "tagAlreadyStaged": "Ši žymė (pavadinimas ir reikšmė) jau laukia vykdymo šioje partijoje.",
     "tagNameExists": "Sisteminė žymė su tokiu pavadinimu jau egzistuoja. Pasirinkite ją iš sąrašo arba naudokite kitą pavadinimą.",
     "smseagleMsgType": "Žinutes tipas",
-    "issueWithGoogleChatOnAndroidHelptext": "Tai taip pat leidžia apeiti aukščiau esančias klaidas, pvz., {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Tai taip pat leidžia apeiti aukščiau esančias klaidas, pvz., {issuetackerURL}",
     "Enter a list of userId": "Įveskite naudotojų ID sąrašą",
     "Enter a list of mobile": "Įveskite mobiliųjų įrenginių sąrašą",
     "smseagleMsgRing": "Skambučio signalas",

@@ -1167,7 +1167,7 @@
     "Clear All Events": "Wis alle evenementen",
     "clearAllEventsMsg": "Weet je zeker dat je alle evenementen wilt verwijderen?",
     "Could not clear events": "Kon {failed}/{total} evenementen niet verwijderen",
-    "issueWithGoogleChatOnAndroidHelptext": "Dit geeft ook de mogelijkheid om upstream bugs als {issueTrackerURL} te passeren",
+    "issueWithGoogleChatOnAndroidHelptext": "Dit geeft ook de mogelijkheid om upstream bugs als {issuetackerURL} te passeren",
     "auto-select": "Automatisch selecteren",
     "smseagleGroupV2": "Telefoonboek groep ID(s)",
     "smseagleContactV2": "Telefoonboek contact ID(s)",

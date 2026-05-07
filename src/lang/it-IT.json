@@ -751,7 +751,7 @@
     "pushoversounds falling": "Cadente",
     "pushoversounds gamelan": "Gamelan",
     "Template plain text instead of using cards": "Utilizza testo semplice invece di utilizzare le schede",
-    "issueWithGoogleChatOnAndroidHelptext": "Ciò consente anche di aggirare bug a monte come {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Ciò consente anche di aggirare bug a monte come {issuetackerURL}",
     "Proto Service Name": "Nome servizio Proto",
     "goAlertInfo": "GoAlert è un'applicazione open source per la pianificazione delle chiamate in reperibilità, l'escalation automatica e le notifiche (come SMS o chiamate vocali). Coinvolgi automaticamente la persona giusta, nel modo giusto e al momento giusto! {0}",
     "AccessKeyId": "ID AccessKey",

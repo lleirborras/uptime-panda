@@ -1100,7 +1100,7 @@
     "mqttWebsocketPathExplanation": "Ruta del WebSocker para MQTT sobre conexión WebSocker (ejemplo, /mqtt)",
     "OAuth Audience": "Audiencia OAuth",
     "Template plain text instead of using cards": "Plantilla de texto plano en vez de utilizar tarjetas",
-    "issueWithGoogleChatOnAndroidHelptext": "Esto también permite evitar errores anteriores como {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Esto también permite evitar errores anteriores como {issuetackerURL}",
     "wayToGetBaleChatID": "Puedes obtener tu ID de chat enviando un mensaje al bot y yendo a esta URL para ver el chat_id:",
     "smseagleContactV2": "ID(s) de contacto(s) de Guía Telefónica",
     "smseagleMsgTtsAdvanced": "Llamada avanzada de texto a voz",

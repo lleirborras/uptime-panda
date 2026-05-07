@@ -775,7 +775,7 @@
     "Copied to clipboard!": "Gekopieerd naar klembord!",
     "Failed to copy to clipboard": "Kopieren naar klembord mislukt",
     "Template plain text instead of using cards": "Sjabloon platte tekst van gebruikte kaarten",
-    "issueWithGoogleChatOnAndroidHelptext": "Dit geeft ook de mogelijkheid om upstream bugs als {issueTrackerURL} te passeren",
+    "issueWithGoogleChatOnAndroidHelptext": "Dit geeft ook de mogelijkheid om upstream bugs als {issuetackerURL} te passeren",
     "wayToGetKookBotToken": "Maak een applicatie en haal ge bot token op bij {0}",
     "wayToGetKookGuildID": "Switch naar 'Developer Mode' in de Kook instellingen, en klik met de rechter muisknop op de guild om de ID op te halen",
     "Guild ID": "Guild ID",

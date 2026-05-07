@@ -908,7 +908,7 @@
     "AccessKeyId": "AccessKey-ID",
     "goAlertInfo": "GoAlert er en åpen kildekode-applikasjon for vaktplanlegging, automatiske eskaleringer og varsler (som SMS eller taleanrop). Engasjer automatisk riktig person, på riktig måte, og til rett tid! {0}",
     "smtpDkimKeySelector": "Nøkkelvelger",
-    "issueWithGoogleChatOnAndroidHelptext": "Dette gjør det også mulig å omgå feil oppstrøms, som {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Dette gjør det også mulig å omgå feil oppstrøms, som {issuetackerURL}",
     "Mentioning": "Nevner",
     "wayToGetKookBotToken": "Opprett en applikasjon og få bot-tokenet ditt på {0}",
     "For safety, must use secret key": "For sikkerhetens skyld må du bruke hemmelig nøkkel",

@@ -1104,7 +1104,7 @@
     "Path": "Път",
     "mqttWebsocketPathExplanation": "Уеб сокет път за MQTT през Уеб сокет връзки (напр. /mqtt)",
     "mqttHostnameTip": "Моля, използвайте този формат {hostnameFormat}",
-    "issueWithGoogleChatOnAndroidHelptext": "Това позволява да се заобиколят грешки, като например {issueTrackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Това позволява да се заобиколят грешки, като например {issuetackerURL}",
     "Template plain text instead of using cards": "Шаблон с обикновен текст вместо използване на карти",
     "Events cleared successfully": "Събитията са изчистени успешно.",
     "No monitors found": "Не са намерени монитори.",
