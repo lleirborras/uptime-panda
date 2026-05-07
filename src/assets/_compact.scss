@@ -46,7 +46,7 @@ h5 { font-size: 0.95rem; }
 }
 
 // ---------------------------------------------------------------------------
-// Status pills — Bootstrap's `.badge` defaults plus our `min-width: 64px`
+// Status pills — Bootstrap's .badge defaults plus our min-width: 64px
 // (Status.vue) made every UP/DOWN/PENDING pill feel oversized. Tighten the
 // padding and let the badge breathe with the text.
 // ---------------------------------------------------------------------------
@@ -74,7 +74,7 @@ h5 { font-size: 0.95rem; }
 
 // ---------------------------------------------------------------------------
 // Form controls — keep Bootstrap floating labels working but tighten the
-// vertical rhythm. Most pages use `.mt-3` between fields; that's fine.
+// vertical rhythm. Most pages use .mt-3 between fields; that's fine.
 // ---------------------------------------------------------------------------
 .form-control,
 .form-select {
@@ -100,7 +100,7 @@ h5 { font-size: 0.95rem; }
 }
 
 // ---------------------------------------------------------------------------
-// Header chrome — `Layout.vue` wraps with `py-3`. Trim it; the brand mark
+// Header chrome — Layout.vue wraps with py-3. Trim it; the brand mark
 // also drops from 40px to 32px in the template change.
 // ---------------------------------------------------------------------------
 header.border-bottom {
@@ -110,7 +110,7 @@ header.border-bottom {
 }
 
 // ---------------------------------------------------------------------------
-// Nav pills — visual weight reduction. Default `nav-pills .nav-link` has
+// Nav pills — visual weight reduction. Default nav-pills .nav-link has
 // ~10px y / 16px x; tighten and round.
 // ---------------------------------------------------------------------------
 .nav-pills {

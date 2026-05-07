@@ -24,7 +24,7 @@ $dropdown-border-radius: 0.5rem;
 
 // ---------------------------------------------------------------------------
 // Density tokens — used by the compact UI layer (_compact.scss). Keeping
-// them here so individual components can opt in (`@import "../assets/vars"`)
+// them here so individual components can opt in (@import "../assets/vars")
 // without having to know where the canonical density numbers live.
 // ---------------------------------------------------------------------------
 $ui-row-pad-y: 0.45rem;
