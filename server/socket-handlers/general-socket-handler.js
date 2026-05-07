@@ -1,12 +1,12 @@
 const { log } = require("../../src/util");
 const { Settings } = require("../settings");
 const { sendInfo } = require("../client");
-const { checkLogin } = require("../util-server");
 const { games } = require("gamedig");
 const { testChrome } = require("../monitor-types/real-browser-monitor-type");
 const fsAsync = require("fs").promises;
 const path = require("path");
-const { socketError, UserFacingError } = require("../utils/socket-error");
+const { onAuthed } = require("../utils/authed-event");
+const { UserFacingError } = require("../utils/socket-error");
 
 /**
  * Get a game list via GameDig
@@ -42,62 +42,45 @@ function getGameList() {
  * @returns {void}
  */
 module.exports.generalSocketHandler = (socket, server) => {
-    socket.on("initServerTimezone", async (timezone) => {
-        try {
-            checkLogin(socket);
-            log.debug("generalSocketHandler", "Timezone: " + timezone);
-            await Settings.set("initServerTimezone", true);
-            await server.setTimezone(timezone);
-            await sendInfo(socket);
-        } catch (e) {
-            log.warn("initServerTimezone", e.message);
-        }
-    });
+    onAuthed(socket, "initServerTimezone", async (socket, timezone) => {
+        log.debug("generalSocketHandler", "Timezone: " + timezone);
+        await Settings.set("initServerTimezone", true);
+        await server.setTimezone(timezone);
+        await sendInfo(socket);
+    }, { logNamespace: "initServerTimezone",
+        fallbackMsg: "Failed to set timezone" });
 
-    socket.on("getGameList", async (callback) => {
-        try {
-            checkLogin(socket);
-            callback({
-                ok: true,
-                gameList: getGameList(),
-            });
-        } catch (e) {
-            socketError(callback, e, "Failed to load game list");
-        }
-    });
+    onAuthed(socket, "getGameList", async (socket, callback) => {
+        callback({
+            ok: true,
+            gameList: getGameList(),
+        });
+    }, { fallbackMsg: "Failed to retrieve game list" });
 
-    socket.on("testChrome", (executable, callback) => {
-        try {
-            checkLogin(socket);
-            // Just noticed that await call could block the whole socket.io server!!! Use pure promise instead.
-            testChrome(executable)
-                .then((version) => {
-                    callback({
-                        ok: true,
-                        msg: {
-                            key: "foundChromiumVersion",
-                            values: [version],
-                        },
-                        msgi18n: true,
-                    });
-                })
-                .catch((e) => {
-                    socketError(callback, e, "Failed to test Chromium executable");
+    onAuthed(socket, "testChrome", (socket, executable, callback) => {
+        // Just noticed that await call could block the whole socket.io server!!! Use pure promise instead.
+        testChrome(executable)
+            .then((version) => {
+                callback({
+                    ok: true,
+                    msg: {
+                        key: "foundChromiumVersion",
+                        values: [version],
+                    },
+                    msgi18n: true,
                 });
-        } catch (e) {
-            socketError(callback, e, "Failed to test Chromium executable");
-        }
-    });
+            })
+            .catch((e) => {
+                callback({
+                    ok: false,
+                    msg: e.message,
+                });
+            });
+    }, { fallbackMsg: "Failed to test Chrome" });
 
-    socket.on("getPushExample", async (language, callback) => {
-        try {
-            checkLogin(socket);
-            if (!/^[a-z-]+$/.test(language)) {
-                throw new UserFacingError("Invalid language");
-            }
-        } catch (e) {
-            socketError(callback, e, "Failed to load push example");
-            return;
+    onAuthed(socket, "getPushExample", async (socket, language, callback) => {
+        if (!/^[a-z-]+$/.test(language)) {
+            throw new UserFacingError("Invalid language");
         }
 
         try {
@@ -119,15 +102,11 @@ module.exports.generalSocketHandler = (socket, server) => {
             ok: false,
             msg: "Not found",
         });
-    });
+    }, { fallbackMsg: "Failed to get push example" });
 
     // Disconnect all other socket clients of the user
-    socket.on("disconnectOtherSocketClients", async () => {
-        try {
-            checkLogin(socket);
-            server.disconnectAllSocketClients(socket.userID, socket.id);
-        } catch (e) {
-            log.warn("disconnectAllSocketClients", e.message);
-        }
-    });
+    onAuthed(socket, "disconnectOtherSocketClients", async (socket) => {
+        server.disconnectAllSocketClients(socket.userID, socket.id);
+    }, { logNamespace: "disconnectAllSocketClients",
+        fallbackMsg: "Failed to disconnect other socket clients" });
 };
