@@ -35,6 +35,7 @@ const JSON_OUT = args.has("--json");
 /**
  * Extracts vue-i18n-style placeholders: {0}, {1}, {count}, {name}, etc.
  * Returns a sorted, deduplicated array.
+ * @param value
  */
 function extractPlaceholders(value) {
     if (typeof value !== "string") {
@@ -50,6 +51,7 @@ function extractPlaceholders(value) {
  * so this is the only way to spot the drift.
  *
  * Assumes flat JSON (no nested objects), which matches en.json's schema.
+ * @param rawText
  */
 function findDuplicateTopLevelKeys(rawText) {
     const counts = new Map();
@@ -70,12 +72,19 @@ function findDuplicateTopLevelKeys(rawText) {
     return dups;
 }
 
+/**
+ * @param file
+ */
 function loadLocale(file) {
     const raw = fs.readFileSync(path.join(LANG_DIR, file), "utf8");
     const data = JSON.parse(raw);
     return { raw, data };
 }
 
+/**
+ * @param en
+ * @param localeData
+ */
 function compareLocale(en, localeData) {
     const enKeys = new Set(Object.keys(en));
     const localeKeys = Object.keys(localeData);
@@ -130,6 +139,10 @@ function compareLocale(en, localeData) {
     return { missing, orphans, typeMismatches, placeholderMismatches };
 }
 
+/**
+ * @param localeData
+ * @param orphans
+ */
 function pruneOrphans(localeData, orphans) {
     // Preserve original key order: rebuild the object skipping orphan keys.
     if (orphans.length === 0) {
@@ -145,6 +158,9 @@ function pruneOrphans(localeData, orphans) {
     return { data: out, changed: true };
 }
 
+/**
+ *
+ */
 function main() {
     const en = JSON.parse(fs.readFileSync(path.join(LANG_DIR, "en.json"), "utf8"));
     const files = fs.readdirSync(LANG_DIR)
@@ -228,6 +244,10 @@ function main() {
     }
 }
 
+/**
+ * @param results
+ * @param totals
+ */
 function writeReport(results, totals) {
     const lines = [];
     lines.push("# i18n audit");
