@@ -144,7 +144,9 @@ describe("Monitor hierarchy traversal (H-2)", () => {
             if (/^\s*select\s+\*\s+from\s+["`]?monitor["`]?\s+where\s+["`]?parent["`]?\s*=/.test(sql)) {
                 recursiveByParentCount++;
             }
-            if (/^\s*select\s+["`]?id["`]?\s*,\s*["`]?name["`]?\s*,\s*["`]?parent["`]?\s+from\s+["`]?monitor["`]?\s*$/.test(sql)) {
+            // O-2 extended the adjacency select to include `active`; match
+            // any select that covers at least id, name, parent from monitor.
+            if (/^\s*select\s+.+\bid["`]?\s*,\s*.+\bname["`]?.+\bparent["`]?.+from\s+["`]?monitor["`]?\s*$/.test(sql)) {
                 adjacencyListLoadCount++;
             }
         };
