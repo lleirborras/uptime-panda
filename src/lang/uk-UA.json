@@ -1105,7 +1105,7 @@
     "mqttWebsocketPathInvalid": "Будь ласка, використовуйте дійсний формат шляху WebSocket",
     "mqttHostnameTip": "Будь ласка, використовуйте цей формат {hostnameFormat}",
     "Template plain text instead of using cards": "Шаблон простого тексту замість використання карток",
-    "issueWithGoogleChatOnAndroidHelptext": "Це також дозволяє обійти помилки на кшталт {issuetackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "Це також дозволяє обійти помилки на кшталт {issueTrackerURL}",
     "Clear All Events": "Очистити всі події",
     "Events cleared successfully": "Події успішно очищено.",
     "No monitors found": "Моніторів не знайдено.",

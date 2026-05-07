@@ -628,7 +628,7 @@
     "apprise": "Apprise (Support 50+ Notification services)",
     "GoogleChat": "Google Chat (Google Workspace only)",
     "Paste the script code (see below)": "Paste the script code (see below)",
-    "issueWithGoogleChatOnAndroidHelptext": "This also allows to get around bugs upstream like {issuetackerURL}",
+    "issueWithGoogleChatOnAndroidHelptext": "This also allows to get around bugs upstream like {issueTrackerURL}",
     "wayToGetKookBotToken": "Create application and get your bot token at {0}",
     "Notification Sound": "Notification Sound",
     "More info on:": "More info on: {0}",
