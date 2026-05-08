@@ -2,6 +2,9 @@
 # Node.js build stage
 ############################################
 FROM node:24-bookworm-slim AS build
+# node:24 bundles npm 11.12.1 (picomatch@4.0.3, CVE-2026-33671).
+# npm 11.13.0+ ships picomatch@4.0.4 which fixes it. Upgrade before use.
+RUN npm install -g npm@11.14.0
 USER node
 WORKDIR /app
 
@@ -24,7 +27,8 @@ LABEL org.opencontainers.image.source="https://github.com/lleirborras/uptime-pan
 # dumb-init: clean signal handling / zombie reaping
 # iputils-ping: ping monitor type
 # curl: healthcheck + in-container debugging
-RUN apt-get update \
+RUN npm install -g npm@11.14.0 \
+    && apt-get update \
     && apt-get install --yes --no-install-recommends \
         dumb-init \
         iputils-ping \
