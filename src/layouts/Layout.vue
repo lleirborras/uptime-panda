@@ -162,6 +162,10 @@
         >
             <font-awesome-icon icon="times" />
         </button>
+
+        <footer v-if="!$root.isMobile" class="app-footer">
+            v{{ $root.frontendVersion }}
+        </footer>
     </div>
 </template>
 
@@ -428,5 +432,12 @@ main {
     .clear-all-toast-btn {
         bottom: 72px;
     }
+}
+
+.app-footer {
+    color: $secondary-text;
+    font-size: 13px;
+    text-align: center;
+    padding: 12px 0 20px;
 }
 </style>
