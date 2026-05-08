@@ -1,0 +1,33 @@
+# Fly.io deployment configuration for uptime-panda.
+# First-time setup (run once locally):
+#   fly apps create uptime-panda          # or choose your own app name
+#   fly volumes create uptime_data --size 1 --region fra
+#   fly secrets set FLY_API_TOKEN=...    # not needed here, but for reference
+# Then add FLY_API_TOKEN to GitHub Actions secrets.
+
+app = "uptime-panda"
+primary_region = "fra"
+
+[build]
+  image = "ghcr.io/lleirborras/uptime-panda:latest"
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 50
+    soft_limit = 25
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[[mounts]]
+  source = "uptime_data"
+  destination = "/app/data"
