@@ -14,7 +14,7 @@ COPY . .
 RUN mkdir ./data
 
 ############################################
-# ⭐ Main Image
+# ⭐ Main Image (rootless by default)
 ############################################
 FROM node:24-bookworm-slim AS release
 WORKDIR /app
@@ -35,6 +35,8 @@ ENV UPTIME_KUMA_IS_CONTAINER=1
 
 COPY --chown=node:node --from=build /app /app
 
+USER node
+
 EXPOSE 3001
 HEALTHCHECK --interval=60s --timeout=30s --start-period=180s --retries=5 \
     CMD curl -f --max-time 28 --insecure http://127.0.0.1:3001 || exit 1
@@ -42,7 +44,8 @@ ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "server/server.js"]
 
 ############################################
-# Rootless Image
+# Root variant (opt-in, for environments that need CAP_NET_RAW ping
+# without explicit capability grants or other root-only features)
 ############################################
-FROM release AS rootless
-USER node
+FROM release AS root
+USER root
