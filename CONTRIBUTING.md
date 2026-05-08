@@ -10,6 +10,61 @@
 > same PR upstream too — the fork should not be a place where good
 > general-purpose work gets stranded.
 
+## Branching and Versioning (fork-specific)
+
+### Branch protection
+
+`master` is a protected branch. **All changes must go through a pull request.**
+Direct pushes are blocked. The only exceptions are automated commits produced
+by the version-bump workflow itself (they bypass protection via `GITHUB_TOKEN`
+with `enforce_admins: false`).
+
+Two status checks must pass before a PR can be merged:
+
+| Check | Workflow |
+|---|---|
+| `check-linters` | `.github/workflows/validate.yml` |
+| `auto-test (ubuntu-22.04, 20)` | `.github/workflows/auto-test.yml` |
+
+### PR titles — Conventional Commits
+
+PR titles **must** follow [Conventional Commits](https://www.conventionalcommits.org/).
+The format is enforced by the `Validate PR title` CI check.
+
+```
+<type>(<optional scope>): <description>
+```
+
+Common types: `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `test`,
+`chore`, `build`, `ci`.
+
+Append `!` before the colon to signal a breaking change:
+```
+feat!: drop Node 18 support
+fix(auth)!: rename session cookie
+```
+
+### Automatic semantic versioning
+
+Every time a PR is merged into `master`, the
+[Version Bump workflow](.github/workflows/version-bump.yml) runs automatically
+and bumps `package.json` (and `package-lock.json`) according to the PR title:
+
+| PR title pattern | Semver bump | Example |
+|---|---|---|
+| `<type>!:` or `<type>(<scope>)!:` | **major** | `feat!: drop SQLite-only mode` |
+| `feat:` or `feat(<scope>):` | **minor** | `feat(db): add PostgreSQL support` |
+| anything else | **patch** | `fix: correct heartbeat interval` |
+
+The workflow commits the version change as:
+
+```
+chore: bump version to X.Y.Z [skip ci]
+```
+
+and pushes a matching git tag (`vX.Y.Z`) to `master`. No manual versioning is
+needed.
+
 First of all, I want to thank everyone who has submitted issues or shared pull
 requests for Uptime Kuma. I never thought the GitHub community would be so nice!
 Because of this, I also never thought that other people would actually read and
