@@ -150,6 +150,7 @@
         "tough-cookie": "~4.1.4",
         "validator": "~13.15.26",
         "web-push": "~3.6.7",
+        "playwright-core": "~1.59.1",
         "ws": "~8.20.0"
     },
     "devDependencies": {
@@ -192,7 +193,6 @@
         "eslint-plugin-vue-scoped-css": "~2.7.2",
         "favico.js": "~0.3.10",
         "node-ssh": "~13.2.1",
-        "playwright-core": "~1.59.1",
         "postcss-html": "~1.8.1",
         "postcss-rtlcss": "~5.7.1",
         "postcss-scss": "~4.0.9",
