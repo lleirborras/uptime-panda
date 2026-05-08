@@ -62,8 +62,10 @@ The workflow commits the version change as:
 chore: bump version to X.Y.Z [skip ci]
 ```
 
-and pushes a matching git tag (`vX.Y.Z`) to `master`. No manual versioning is
-needed.
+pushes a matching git tag (`vX.Y.Z`) to `master`, and creates a **GitHub
+Release** at that tag with auto-generated notes (compiled from the PR titles
+merged since the previous release). No manual versioning or release creation
+is needed.
 
 First of all, I want to thank everyone who has submitted issues or shared pull
 requests for Uptime Kuma. I never thought the GitHub community would be so nice!

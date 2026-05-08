@@ -46,9 +46,20 @@ jobs:
           node-version: 20
 
       - name: Bump version and push tag
+        id: version
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # npm version updates package.json + package-lock.json, commits, and tags
           npm version ${{ steps.bump.outputs.type }} -m "chore: bump version to %s [skip ci]"
           git push --follow-tags
+          echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --generate-notes \
+            --verify-tag
