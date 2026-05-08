@@ -1,20 +1,5 @@
-# Default to upstream's prebuilt slim base (no MariaDB, no Chromium).
-# Override with --build-arg to use a fork-owned base or the full base2, e.g.:
-#   docker build \
-#     --build-arg BASE_IMAGE=louislam/uptime-kuma:base2 \
-#     --build-arg BUILDER_GO_IMAGE=louislam/uptime-kuma:builder-go \
-#     -f docker/dockerfile -t uptime-panda .
-ARG BASE_IMAGE=louislam/uptime-kuma:base2-slim
-ARG BUILDER_GO_IMAGE=louislam/uptime-kuma:builder-go
-
-############################################
-# Healthcheck binary (Go)
-############################################
-FROM ${BUILDER_GO_IMAGE} AS build_healthcheck
-
 ############################################
 # Node.js build stage
-# Uses plain node slim — the full base2 image is not needed here.
 ############################################
 FROM node:24-bookworm-slim AS build
 USER node
@@ -26,23 +11,33 @@ COPY --chown=node:node package.json package.json
 COPY --chown=node:node package-lock.json package-lock.json
 RUN npm ci --omit=dev
 COPY . .
-COPY --chown=node:node --from=build_healthcheck /app/extra/healthcheck /app/extra/healthcheck
 RUN mkdir ./data
 
 ############################################
 # ⭐ Main Image
 ############################################
-FROM $BASE_IMAGE AS release
+FROM node:24-bookworm-slim AS release
 WORKDIR /app
 
 LABEL org.opencontainers.image.source="https://github.com/lleirborras/uptime-panda"
+
+# dumb-init: clean signal handling / zombie reaping
+# iputils-ping: ping monitor type
+# curl: healthcheck + in-container debugging
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends \
+        dumb-init \
+        iputils-ping \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV UPTIME_KUMA_IS_CONTAINER=1
 
 COPY --chown=node:node --from=build /app /app
 
 EXPOSE 3001
-HEALTHCHECK --interval=60s --timeout=30s --start-period=180s --retries=5 CMD extra/healthcheck
+HEALTHCHECK --interval=60s --timeout=30s --start-period=180s --retries=5 \
+    CMD curl -f --max-time 28 --insecure http://127.0.0.1:3001 || exit 1
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "server/server.js"]
 
