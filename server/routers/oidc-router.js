@@ -7,6 +7,7 @@ const User = require("../model/user");
 const { getKnex } = require("../db");
 const { UptimeKumaServer } = require("../uptime-kuma-server");
 const { log } = require("../../src/util");
+const { isSSL } = require("../config");
 
 let _oidcClient = null;
 let _oidcConfigKey = null;
@@ -49,7 +50,9 @@ router.get("/auth/oidc/start", async (req, res) => {
         const codeVerifier = generators.codeVerifier();
         const codeChallenge = generators.codeChallenge(codeVerifier);
 
-        const redirectUri = req.protocol + "://" + req.get("host") + "/auth/oidc/callback";
+        const trustProxy = await Settings.get("trustProxy");
+        const proto = (trustProxy && req.headers["x-forwarded-proto"]) || (isSSL ? "https" : req.protocol);
+        const redirectUri = proto + "://" + req.get("host") + "/auth/oidc/callback";
 
         const authUrl = client.authorizationUrl({
             redirect_uri: redirectUri,
@@ -68,6 +71,7 @@ router.get("/auth/oidc/start", async (req, res) => {
             sameSite: "lax",
             maxAge: 600,
             path: "/",
+            secure: isSSL || proto === "https",
         }));
 
         res.redirect(authUrl);
@@ -102,7 +106,9 @@ router.get("/auth/oidc/callback", async (req, res) => {
             return res.redirect("/?oidcError=1");
         }
 
-        const redirectUri = req.protocol + "://" + req.get("host") + "/auth/oidc/callback";
+        const trustProxy = await Settings.get("trustProxy");
+        const proto = (trustProxy && req.headers["x-forwarded-proto"]) || (isSSL ? "https" : req.protocol);
+        const redirectUri = proto + "://" + req.get("host") + "/auth/oidc/callback";
 
         const client = await getOidcClient();
         const tokenSet = await client.callback(redirectUri, req.query, {
@@ -128,7 +134,7 @@ router.get("/auth/oidc/callback", async (req, res) => {
 
         if (!user) {
             const username = preferredUsername || email || sub;
-            await knex("user").insert({ username, password: null, active: 1, oidc_sub: sub })
+            await knex("user").insert({ username, password: null, active: true, oidc_sub: sub })
                 .onConflict("oidc_sub").ignore();
             user = await User.query().where({ oidc_sub: sub }).first();
         }
@@ -140,6 +146,7 @@ router.get("/auth/oidc/callback", async (req, res) => {
             sameSite: "lax",
             maxAge: 0,
             path: "/",
+            secure: isSSL || proto === "https",
         }));
 
         res.redirect("/?token=" + encodeURIComponent(token));

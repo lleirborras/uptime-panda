@@ -109,6 +109,7 @@ export default {
             const _oidcToken = _oidcParams.get("token");
             if (_oidcToken) {
                 this.storage().token = _oidcToken;
+                this.socket.token = _oidcToken;
                 history.replaceState({}, "", location.pathname);
             }
             if (_oidcParams.get("oidcError")) {

@@ -373,6 +373,10 @@ let needSetup = false;
     // With Basic Auth using the first user's username/password
     app.get("/metrics", apiAuth, prometheusAPIMetrics());
 
+    // OIDC Router — must be before static middleware so /auth/oidc/* routes are never intercepted by dist/
+    const oidcRouter = require("./routers/oidc-router");
+    app.use(oidcRouter);
+
     app.use(
         "/",
         expressStaticGzip("dist", {
@@ -394,10 +398,6 @@ let needSetup = false;
     // Status Page Router
     const statusPageRouter = require("./routers/status-page-router");
     app.use(statusPageRouter);
-
-    // OIDC Router
-    const oidcRouter = require("./routers/oidc-router");
-    app.use(oidcRouter);
 
     // Universal Route Handler, must be at the end of all express routes.
     app.get("*", async (_request, response) => {
