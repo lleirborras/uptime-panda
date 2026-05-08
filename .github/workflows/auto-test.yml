@@ -11,7 +11,30 @@ on:
 permissions: {}
 
 jobs:
+  check-linters:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with: { persist-credentials: false }
+
+      - name: Cache/Restore node_modules
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node24-${{ hashFiles('**/package-lock.json') }}
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+      - run: npm clean-install --no-fund
+      - run: npm run lint:prod
+
   auto-test:
+    needs: check-linters
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -34,13 +57,11 @@ jobs:
 
       - name: Cache/Restore node_modules
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        id: node-modules-cache
         with:
           path: node_modules
           key: node-modules-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Use Node.js ${{ matrix.node }}
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: ${{ matrix.node }}
       - run: npm clean-install --no-fund
@@ -57,14 +78,15 @@ jobs:
 
   # As a lot of dev dependencies are not supported on ARMv7, we have to test it separately and just test if `npm ci --production` works
   armv7-simple-test:
+    needs: check-linters
     runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        node: [20, 22]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node: [20]
+        # Node 24+ dropped arm32v7 images; use last-supported LTS (20)
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -86,52 +108,27 @@ jobs:
             arm32v7/node:${{ matrix.node }} \
             npm clean-install --no-fund --production
 
-  check-linters:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - run: git config --global core.autocrlf false # Mainly for Windows
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with: { persist-credentials: false }
-
-      - name: Cache/Restore node_modules
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        id: node-modules-cache
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Use Node.js 20
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: 20
-      - run: npm clean-install --no-fund
-      - run: npm run lint:prod
-
   e2e-test:
+    needs: check-linters
     runs-on: ubuntu-22.04-arm
     permissions:
       contents: read
     env:
       PLAYWRIGHT_VERSION: ~1.59.1
     steps:
-      - run: git config --global core.autocrlf false # Mainly for Windows
+      - run: git config --global core.autocrlf false
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with: { persist-credentials: false }
 
       - name: Cache/Restore node_modules
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        id: node-modules-cache
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('**/package-lock.json') }}
+          key: node-modules-${{ runner.os }}-node24-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: 22
+          node-version: 24
       - run: npm clean-install --no-fund
 
       - name: Rebuild native modules for ARM64
