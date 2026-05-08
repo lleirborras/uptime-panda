@@ -1,0 +1,40 @@
+# Fly.io deployment configuration for uptime-panda.
+# First-time setup (run once locally):
+#   brew install flyctl
+#   fly auth login
+#   fly apps create uptime-panda          # or choose your own app name
+#   fly volumes create uptime_data --size 1 --region fra
+# Then add FLY_API_TOKEN to GitHub Actions secrets:
+#   gh secret set FLY_API_TOKEN --repo lleirborras/uptime-panda
+#
+# Note: Fly.io warns about single-volume availability. A second volume would
+# spin up a second independent instance — SQLite cannot be shared across VMs.
+# Single volume is acceptable for a test environment. For production HA, use
+# LiteFS (https://fly.io/docs/litefs/) to replicate SQLite across machines.
+
+app = "uptime-panda"
+primary_region = "fra"
+
+[build]
+  image = "ghcr.io/lleirborras/uptime-panda:latest"
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 50
+    soft_limit = 25
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[[mounts]]
+  source = "uptime_data"
+  destination = "/app/data"
