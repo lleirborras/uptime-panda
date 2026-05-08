@@ -1,6 +1,6 @@
 @import "vars.scss";
 @import "multiselect.scss";
-@import "node_modules/bootstrap/scss/bootstrap";
+@import "bootstrap/scss/bootstrap";
 // Density / typography overrides on top of Bootstrap. Loaded last so it wins
 // the cascade against Bootstrap's defaults but stays beatable by component
 // scoped style blocks. See _compact.scss for the rationale per rule.
