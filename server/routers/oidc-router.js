@@ -8,10 +8,15 @@ const { getKnex } = require("../db");
 const { UptimeKumaServer } = require("../uptime-kuma-server");
 const { log } = require("../../src/util");
 const { isSSL } = require("../config");
+const { loginRateLimiter } = require("../rate-limiter");
 
 let _oidcClient = null;
 let _oidcConfigKey = null;
 
+/**
+ * Returns a cached openid-client Client, re-discovering the issuer when settings change.
+ * @returns {Promise<import("openid-client").Client>} Configured OIDC client
+ */
 async function getOidcClient() {
     const issuerUrl = await Settings.get("oidcIssuer");
     const clientId = await Settings.get("oidcClientId");
@@ -29,6 +34,10 @@ async function getOidcClient() {
     return _oidcClient;
 }
 
+/**
+ * Clears the cached OIDC client, forcing re-discovery on the next request.
+ * Call this whenever OIDC settings change.
+ */
 function resetOidcClient() {
     _oidcClient = null;
     _oidcConfigKey = null;
@@ -38,6 +47,10 @@ const router = express.Router();
 
 router.get("/auth/oidc/start", async (req, res) => {
     try {
+        if (!await loginRateLimiter.pass(null)) {
+            return res.status(429).send("Too many requests");
+        }
+
         const enabled = await Settings.get("oidcEnabled");
         if (!enabled) {
             return res.sendStatus(404);
@@ -83,6 +96,10 @@ router.get("/auth/oidc/start", async (req, res) => {
 
 router.get("/auth/oidc/callback", async (req, res) => {
     try {
+        if (!await loginRateLimiter.pass(null)) {
+            return res.redirect("/?oidcError=1");
+        }
+
         const enabled = await Settings.get("oidcEnabled");
         if (!enabled) {
             return res.sendStatus(404);
