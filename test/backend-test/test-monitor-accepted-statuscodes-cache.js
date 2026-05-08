@@ -18,7 +18,10 @@ const ProxyModel = require("../../server/model/proxy");
 const DockerHostModel = require("../../server/model/docker_host");
 const Monitor = require("../../server/model/monitor");
 
-// Stub Objection query so _refreshStaticConfig() doesn't need a DB.
+/**
+ * Stub Objection query methods so _refreshStaticConfig() doesn't need a real DB.
+ * @returns {Function} Restore function that resets the original query methods.
+ */
 function stubQueries() {
     const origProxy = ProxyModel.query;
     const origDocker = DockerHostModel.query;
@@ -33,7 +36,9 @@ function stubQueries() {
 describe("Monitor.getAcceptedStatuscodes() cache (O-1)", () => {
     let restore;
 
-    beforeEach(() => { restore = stubQueries(); });
+    beforeEach(() => {
+        restore = stubQueries();
+    });
     afterEach(() => restore());
 
     test("parses and caches on first call", () => {

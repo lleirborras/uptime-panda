@@ -20,7 +20,6 @@ const dbModulePath = require.resolve("../../server/db");
 /**
  * Install a fake getKnex into the require cache and return the Monitor
  * class (re-required so it picks up the fake).
- *
  * @param {Function} fakeGetKnex Function that returns a Knex-like query builder.
  * @returns {Function} Monitor class with faked DB.
  */
@@ -41,7 +40,7 @@ function loadMonitorWithFakeDb(fakeGetKnex) {
 /**
  * Build a minimal certInfo result for a given fingerprint.
  * @param {string} fp fingerprint256 value
- * @returns {object}
+ * @returns {object} Minimal heartbeat-style result with certInfo.
  */
 function certResult(fp) {
     return { valid: true, certInfo: { fingerprint256: fp } };
