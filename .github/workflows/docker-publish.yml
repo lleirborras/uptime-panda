@@ -73,27 +73,27 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ── rootless image ────────────────────────────────────────────────────
-      - name: Extract metadata (rootless)
-        id: meta-rootless
+      # ── root variant (opt-in) ─────────────────────────────────────────────
+      - name: Extract metadata (root)
+        id: meta-root
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
           images: ghcr.io/lleirborras/uptime-panda
           tags: |
-            type=semver,pattern={{version}}-rootless
-            type=semver,pattern={{major}}.{{minor}}-rootless
-            type=raw,value=latest-rootless
+            type=semver,pattern={{version}}-root
+            type=semver,pattern={{major}}.{{minor}}-root
+            type=raw,value=latest-root
 
-      - name: Build and push (rootless)
+      - name: Build and push (root)
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
           file: docker/dockerfile
-          target: rootless
+          target: root
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
-          tags: ${{ steps.meta-rootless.outputs.tags }}
-          labels: ${{ steps.meta-rootless.outputs.labels }}
+          tags: ${{ steps.meta-root.outputs.tags }}
+          labels: ${{ steps.meta-root.outputs.labels }}
           provenance: true   # I
           sbom: true         # I
           cache-from: type=gha

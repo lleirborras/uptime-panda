@@ -1,0 +1,4 @@
+# picomatch@2.3.2 (CVE-2026-33671 ReDoS) is flagged because the lockfile
+# lists it, but it is marked "dev": true and is not installed in the
+# production image (npm ci --omit=dev excludes it).
+CVE-2026-33671

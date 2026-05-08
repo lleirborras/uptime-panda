@@ -2,7 +2,7 @@
 # remember `npm run build` on the host.
 #
 # Built directly from the official Node 24 LTS slim image; no dependency on
-# upstream's `louislam/uptime-kuma:base2` so this fork's CI/dev flow doesn't
+# upstream base images, so this fork's CI/dev flow doesn't
 # break when upstream rebuilds their base.
 #
 # Differences from docker/dockerfile (production):

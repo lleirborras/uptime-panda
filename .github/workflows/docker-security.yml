@@ -1,0 +1,118 @@
+name: Docker Security Scan
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  # Fast gate: Dockerfile misconfiguration check (~30 s)
+  trivy-config:
+    name: Dockerfile misconfiguration scan
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Scan Dockerfile for misconfigurations
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: docker/dockerfile
+          format: sarif
+          output: trivy-config.sarif
+          exit-code: "1"
+          severity: CRITICAL,HIGH,MEDIUM
+
+      - name: Upload config scan results
+        uses: github/codeql-action/upload-sarif@bc0b696b4103f5fe60f15749af68a046868d511a # codeql-bundle-v2.25.4
+        if: always()
+        with:
+          sarif_file: trivy-config.sarif
+          category: trivy-config
+
+  # Full image build + vulnerability scan (~8 min)
+  trivy-image:
+    name: Container image vulnerability scan
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0 # zizmor: ignore[cache-poisoning]
+        with:
+          node-version: 24
+
+      - name: Cache/Restore node_modules
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5 # zizmor: ignore[cache-poisoning]
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node24-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Build frontend
+        run: npm ci && npm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+
+      - name: Build image (local, no push)
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: docker/dockerfile
+          target: release
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: uptime-panda:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Gate: fail the job if CRITICAL or HIGH fixable vulns exist
+      - name: Scan image with Trivy (exit-code gate)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: uptime-panda:scan
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          scanners: vuln
+
+      # Report: generate SARIF with all severities for GitHub Security tab
+      - name: Scan image with Trivy (SARIF report)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        if: always()
+        with:
+          image-ref: uptime-panda:scan
+          format: sarif
+          output: trivy-image.sarif
+          exit-code: "0"
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          scanners: vuln
+
+      - name: Upload image scan results
+        uses: github/codeql-action/upload-sarif@bc0b696b4103f5fe60f15749af68a046868d511a # codeql-bundle-v2.25.4
+        if: always()
+        with:
+          sarif_file: trivy-image.sarif
+          category: trivy-image

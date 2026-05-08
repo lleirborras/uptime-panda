@@ -136,38 +136,38 @@ The release notes are auto-generated from the PR titles merged since the previou
 4. Logs into GHCR via `GITHUB_TOKEN`
 5. Builds and pushes two image variants for three platforms:
 
-| Dockerfile target | Platforms | Description |
-|---|---|---|
-| `release` | `linux/amd64`, `linux/arm64`, `linux/arm/v7` | Runs as root |
-| `rootless` | `linux/amd64`, `linux/arm64`, `linux/arm/v7` | Runs as `node` user |
+| Dockerfile target | Platforms | User | Use case |
+|---|---|---|---|
+| `release` | `linux/amd64`, `linux/arm64`, `linux/arm/v7` | `node` (non-root) | Default — recommended, k8s-friendly |
+| `root` | `linux/amd64`, `linux/arm64`, `linux/arm/v7` | `root` | Opt-in — environments without `CAP_NET_RAW` grants for ping |
 
 #### Image tags
 
-Every release produces 6 tags on `ghcr.io/lleirborras/uptime-panda`:
+Every release produces 6 tags on [`ghcr.io/lleirborras/uptime-panda`](https://ghcr.io/lleirborras/uptime-panda):
 
-| Tag | Updates on |
-|---|---|
-| `latest` | every release |
-| `latest-rootless` | every release |
-| `X.Y` (e.g. `2.3`) | every patch in that minor |
-| `X.Y-rootless` | every patch in that minor |
-| `X.Y.Z` (e.g. `2.3.3`) | pinned to this exact release |
-| `X.Y.Z-rootless` | pinned to this exact release |
+| Tag | Variant | Updates on |
+|---|---|---|
+| `latest` | non-root | every release |
+| `latest-root` | root | every release |
+| `X.Y` (e.g. `2.4`) | non-root | every patch in that minor |
+| `X.Y-root` (e.g. `2.4-root`) | root | every patch in that minor |
+| `X.Y.Z` (e.g. `2.4.1`) | non-root | pinned to this exact release |
+| `X.Y.Z-root` (e.g. `2.4.1-root`) | root | pinned to this exact release |
 
 #### Using the images
 
 ```bash
-# Standard (recommended for most users)
+# Default — non-root, recommended for most users
 docker run -d -p 3001:3001 -v uptime-panda:/app/data \
   --name uptime-panda ghcr.io/lleirborras/uptime-panda:latest
 
-# Rootless (better security posture)
+# Root variant — for environments without CAP_NET_RAW (ping monitors need it)
 docker run -d -p 3001:3001 -v uptime-panda:/app/data \
-  --name uptime-panda ghcr.io/lleirborras/uptime-panda:latest-rootless
+  --name uptime-panda ghcr.io/lleirborras/uptime-panda:latest-root
 
 # Pin to a specific release
 docker run -d -p 3001:3001 -v uptime-panda:/app/data \
-  --name uptime-panda ghcr.io/lleirborras/uptime-panda:2.3.3
+  --name uptime-panda ghcr.io/lleirborras/uptime-panda:2.4.1
 ```
 
 ---

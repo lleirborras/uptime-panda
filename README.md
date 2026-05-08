@@ -54,23 +54,42 @@ It is a temporary live demo, all data will be deleted after 10 minutes.
 
 ### 🐳 Docker — quick start
 
-Images are published to **GHCR** on every release for `linux/amd64`, `linux/arm64`, and `linux/arm/v7`:
+Images are published to **[GHCR](https://ghcr.io/lleirborras/uptime-panda)** on every release for three architectures:
+
+| Architecture | Platform tag |
+|---|---|
+| x86-64 | `linux/amd64` |
+| ARM 64-bit (Apple Silicon, Raspberry Pi 4+) | `linux/arm64` |
+| ARM 32-bit (Raspberry Pi 2/3) | `linux/arm/v7` |
+
+Two variants per release:
+
+| Variant | Tag suffix | Runs as | When to use |
+|---|---|---|---|
+| **Default** | _(none)_ | `node` (non-root) | Recommended — works on k8s with PSP/PSA, rootless Docker |
+| **Root** | `-root` | `root` | Environments where `CAP_NET_RAW` is not granted and ping monitors are needed |
 
 ```bash
-# Latest release
+# Latest — non-root (recommended)
 docker run -d -p 3001:3001 -v uptime-panda:/app/data \
   --name uptime-panda ghcr.io/lleirborras/uptime-panda:latest
 
-# Rootless variant (runs as non-root node user)
+# Root variant
 docker run -d -p 3001:3001 -v uptime-panda:/app/data \
-  --name uptime-panda ghcr.io/lleirborras/uptime-panda:latest-rootless
+  --name uptime-panda ghcr.io/lleirborras/uptime-panda:latest-root
 
 # Pin to a specific release
 docker run -d -p 3001:3001 -v uptime-panda:/app/data \
-  --name uptime-panda ghcr.io/lleirborras/uptime-panda:2.3.3
+  --name uptime-panda ghcr.io/lleirborras/uptime-panda:2.4.1
+
+# Pin minor (always latest patch)
+docker run -d -p 3001:3001 -v uptime-panda:/app/data \
+  --name uptime-panda ghcr.io/lleirborras/uptime-panda:2.4
 ```
 
-See [`docs/CI_CD.md`](docs/CI_CD.md) for the full list of tags and the release pipeline.
+Browse all published tags: [ghcr.io/lleirborras/uptime-panda](https://ghcr.io/lleirborras/uptime-panda)
+
+See [`docs/CI_CD.md`](docs/CI_CD.md) for the full tag matrix and release pipeline.
 
 ### 🐳 Docker Compose
 
