@@ -1,0 +1,50 @@
+name: Version Bump
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [master]
+
+jobs:
+  bump:
+    # Skip version-bump PRs themselves to avoid infinite loop
+    if: >
+      github.event.pull_request.merged == true &&
+      !startsWith(github.event.pull_request.title, 'chore: bump version')
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine bump type from PR title
+        id: bump
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # Breaking change: any type with ! before the colon
+          if echo "$PR_TITLE" | grep -qE '^[a-z]+(\([^)]+\))?!:'; then
+            echo "type=major" >> "$GITHUB_OUTPUT"
+          # New feature
+          elif echo "$PR_TITLE" | grep -qE '^feat(\([^)]+\))?:'; then
+            echo "type=minor" >> "$GITHUB_OUTPUT"
+          # Everything else: fix, chore, perf, refactor, docs, style, test, build, ci
+          else
+            echo "type=patch" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bump version and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npm version ${{ steps.bump.outputs.type }} -m "chore: bump version to %s [skip ci]"
+          git push --follow-tags
