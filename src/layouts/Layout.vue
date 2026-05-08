@@ -25,7 +25,7 @@
             <a
                 v-if="hasNewVersion"
                 target="_blank"
-                href="https://github.com/louislam/uptime-kuma/releases"
+                href="https://github.com/lleirborras/uptime-panda/releases"
                 class="btn btn-primary me-3"
             >
                 <font-awesome-icon icon="arrow-alt-circle-up" />
@@ -121,7 +121,7 @@
         <header v-else class="d-flex flex-wrap justify-content-center pt-2 pb-2 mb-3">
             <router-link to="/dashboard" class="d-flex align-items-center text-dark text-decoration-none">
                 <object class="bi" width="40" height="40" data="/icon.svg" />
-                <span class="fs-4 title ms-2">Uptime Kuma</span>
+                <span class="fs-4 title ms-2">Uptime Panda</span>
             </router-link>
         </header>
 
