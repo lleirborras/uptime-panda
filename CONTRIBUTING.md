@@ -67,6 +67,27 @@ Release** at that tag with auto-generated notes (compiled from the PR titles
 merged since the previous release). No manual versioning or release creation
 is needed.
 
+### Docker images
+
+Every GitHub Release automatically triggers
+[`.github/workflows/docker-publish.yml`](.github/workflows/docker-publish.yml),
+which builds and pushes multi-platform images to the **GitHub Container
+Registry (GHCR)**:
+
+| Image | Platforms | Use |
+|---|---|---|
+| `ghcr.io/lleirborras/uptime-panda:latest` | amd64, arm64, arm/v7 | Standard (runs as root) |
+| `ghcr.io/lleirborras/uptime-panda:latest-rootless` | amd64, arm64, arm/v7 | Rootless (`USER node`) |
+| `ghcr.io/lleirborras/uptime-panda:X.Y.Z` | amd64, arm64, arm/v7 | Pinned release |
+| `ghcr.io/lleirborras/uptime-panda:X.Y.Z-rootless` | amd64, arm64, arm/v7 | Pinned rootless |
+
+Quick start:
+
+```bash
+docker run -d -p 3001:3001 -v uptime-panda:/app/data \
+  --name uptime-panda ghcr.io/lleirborras/uptime-panda:latest
+```
+
 First of all, I want to thank everyone who has submitted issues or shared pull
 requests for Uptime Kuma. I never thought the GitHub community would be so nice!
 Because of this, I also never thought that other people would actually read and
