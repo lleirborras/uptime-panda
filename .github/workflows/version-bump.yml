@@ -20,9 +20,10 @@ jobs:
         with:
           ref: master
           fetch-depth: 0
-          # GITHUB_TOKEN is used so the push is treated as admin (enforce_admins=false)
-          # and can bypass the "require PR" protection rule.
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # GH_PAT is a fine-grained PAT with Contents:write on this repo.
+          # Needed so the push is authenticated as the repo owner, who can
+          # bypass the branch protection PR requirement.
+          token: ${{ secrets.GH_PAT }}
 
       - name: Determine bump type from PR title
         id: bump
