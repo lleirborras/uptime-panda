@@ -1,7 +1,9 @@
 name: Deploy to Fly.io
 
 # Runs after docker-publish.yml completes so the :latest image is ready.
-on:
+# workflow_run is intentional here: it must wait for the image push to finish
+# before deploying, and only fires from the protected default branch context.
+on: # zizmor: ignore[dangerous-triggers]
   workflow_run:
     workflows: ["Publish Docker Image"]
     types: [completed]
