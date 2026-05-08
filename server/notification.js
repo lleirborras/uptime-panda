@@ -243,8 +243,7 @@ class Notification {
         let bean;
 
         if (notificationID) {
-            bean = await knex("notification").where({ id: notificationID,
-                user_id: userID }).first();
+            bean = await knex("notification").where({ id: notificationID, user_id: userID }).first();
 
             if (!bean) {
                 throw new Error("notification not found");
@@ -286,8 +285,7 @@ class Notification {
      */
     static async delete(notificationID, userID) {
         const knex = getKnex();
-        const deleted = await knex("notification").where({ id: notificationID,
-            user_id: userID }).delete();
+        const deleted = await knex("notification").where({ id: notificationID, user_id: userID }).delete();
         if (deleted === 0) {
             throw new Error("notification not found");
         }
@@ -314,8 +312,7 @@ async function applyNotificationEveryMonitor(notificationID, userID) {
 
     for (let i = 0; i < monitors.length; i++) {
         const checkNotification = await knex("monitor_notification")
-            .where({ monitor_id: monitors[i].id,
-                notification_id: notificationID })
+            .where({ monitor_id: monitors[i].id, notification_id: notificationID })
             .first();
 
         if (!checkNotification) {

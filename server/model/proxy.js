@@ -1,5 +1,6 @@
 const { BaseModel } = require("./base-model");
 
+// biome-ignore lint/suspicious/noShadowRestrictedNames: class name predates JS Proxy global; rename is a larger refactor
 class Proxy extends BaseModel {
     static tableName = "proxy";
 

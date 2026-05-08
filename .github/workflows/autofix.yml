@@ -34,11 +34,11 @@ jobs:
         run: npm run lint-fix:js
         continue-on-error: true
 
-      - name: Auto-fix CSS/SCSS linting issues
+      - name: Auto-fix CSS/SCSS linting issues (Biome)
         run: npm run lint-fix:style
         continue-on-error: true
 
-      - name: Auto-format code with Prettier
+      - name: Auto-format code with Biome and Prettier (Vue only)
         run: npm run fmt
         continue-on-error: true
 

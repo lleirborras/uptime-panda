@@ -1,5 +1,5 @@
 const jsesc = require("jsesc");
-const { escape } = require("html-escaper");
+const { escape: htmlEscape } = require("html-escaper");
 
 /**
  * Returns a string that represents the javascript that is required to insert the Umami Analytics script
@@ -21,10 +21,10 @@ function getUmamiAnalyticsScript(scriptUrl, websiteId) {
     }
 
     // Escape the Script url for use in an HTML attribute.
-    let escapedScriptUrlHTMLAttribute = escape(escapedScriptUrlJS);
+    let escapedScriptUrlHTMLAttribute = htmlEscape(escapedScriptUrlJS);
 
     // Escape the website id for use in an HTML attribute.
-    let escapedWebsiteIdHTMLAttribute = escape(escapedWebsiteIdJS);
+    let escapedWebsiteIdHTMLAttribute = htmlEscape(escapedWebsiteIdJS);
 
     return `
         <script defer src="${escapedScriptUrlHTMLAttribute}" data-website-id="${escapedWebsiteIdHTMLAttribute}"></script>

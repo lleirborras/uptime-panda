@@ -42,7 +42,7 @@ function extractPlaceholders(value) {
         return [];
     }
     const matches = value.match(/\{[a-zA-Z0-9_]+\}/g) || [];
-    return [ ...new Set(matches) ].sort();
+    return [...new Set(matches)].sort();
 }
 
 /**
@@ -64,7 +64,7 @@ function findDuplicateTopLevelKeys(rawText) {
         counts.set(key, (counts.get(key) || 0) + 1);
     }
     const dups = [];
-    for (const [ k, c ] of counts) {
+    for (const [k, c] of counts) {
         if (c > 1) {
             dups.push({ key: k, count: c });
         }
@@ -122,8 +122,8 @@ function compareLocale(en, localeData) {
             // Compare as sets — order doesn't matter, presence does.
             const enSet = new Set(enPh);
             const locSet = new Set(locPh);
-            const onlyEn = enPh.filter(p => !locSet.has(p));
-            const onlyLoc = locPh.filter(p => !enSet.has(p));
+            const onlyEn = enPh.filter((p) => !locSet.has(p));
+            const onlyLoc = locPh.filter((p) => !enSet.has(p));
             if (onlyEn.length || onlyLoc.length) {
                 placeholderMismatches.push({
                     key: k,
@@ -163,8 +163,9 @@ function pruneOrphans(localeData, orphans) {
  */
 function main() {
     const en = JSON.parse(fs.readFileSync(path.join(LANG_DIR, "en.json"), "utf8"));
-    const files = fs.readdirSync(LANG_DIR)
-        .filter(f => f.endsWith(".json") && f !== "en.json")
+    const files = fs
+        .readdirSync(LANG_DIR)
+        .filter((f) => f.endsWith(".json") && f !== "en.json")
         .sort();
 
     const results = [];
@@ -208,16 +209,22 @@ function main() {
     }
 
     if (JSON_OUT) {
-        process.stdout.write(JSON.stringify({
-            totals: {
-                locales: files.length,
-                orphansPruned: totalOrphansPruned,
-                missingKeys: totalMissing,
-                placeholderMismatches: totalPlaceholderMismatches,
-                duplicateKeys: totalDuplicates,
-            },
-            results,
-        }, null, 2) + "\n");
+        process.stdout.write(
+            JSON.stringify(
+                {
+                    totals: {
+                        locales: files.length,
+                        orphansPruned: totalOrphansPruned,
+                        missingKeys: totalMissing,
+                        placeholderMismatches: totalPlaceholderMismatches,
+                        duplicateKeys: totalDuplicates,
+                    },
+                    results,
+                },
+                null,
+                2
+            ) + "\n"
+        );
         return;
     }
 
@@ -233,10 +240,10 @@ function main() {
 
     console.log(
         `i18n audit: ${files.length} locales | ` +
-        `${totalOrphansPruned} orphans${CHECK_ONLY ? "" : " pruned"} | ` +
-        `${totalMissing} missing | ` +
-        `${totalPlaceholderMismatches} placeholder mismatches | ` +
-        `${totalDuplicates} duplicate keys`
+            `${totalOrphansPruned} orphans${CHECK_ONLY ? "" : " pruned"} | ` +
+            `${totalMissing} missing | ` +
+            `${totalPlaceholderMismatches} placeholder mismatches | ` +
+            `${totalDuplicates} duplicate keys`
     );
 
     if (CHECK_ONLY && (totalOrphansPruned > 0 || totalDuplicates > 0)) {
@@ -262,15 +269,19 @@ function writeReport(results, totals) {
     lines.push(`- Placeholder mismatches: **${totals.totalPlaceholderMismatches}**`);
     lines.push(`- In-file duplicate keys detected: **${totals.totalDuplicates}**`);
     lines.push("");
-    lines.push("Missing keys are *not* auto-filled with English. vue-i18n falls back to en at runtime, and auto-filling would mark untranslated strings as translated, which would confuse Weblate sync.");
+    lines.push(
+        "Missing keys are *not* auto-filled with English. vue-i18n falls back to en at runtime, and auto-filling would mark untranslated strings as translated, which would confuse Weblate sync."
+    );
     lines.push("");
     lines.push("## Top offenders by missing-key count");
     lines.push("");
-    const top = [ ...results ].sort((a, b) => b.missingCount - a.missingCount).slice(0, 15);
+    const top = [...results].sort((a, b) => b.missingCount - a.missingCount).slice(0, 15);
     lines.push("| Locale | Language | Missing | Orphans pruned | Placeholder mismatches |");
     lines.push("|---|---|---:|---:|---:|");
     for (const r of top) {
-        lines.push(`| \`${r.locale}\` | ${r.languageName || ""} | ${r.missingCount} | ${r.orphanCount} | ${r.placeholderMismatches.length} |`);
+        lines.push(
+            `| \`${r.locale}\` | ${r.languageName || ""} | ${r.missingCount} | ${r.orphanCount} | ${r.placeholderMismatches.length} |`
+        );
     }
     lines.push("");
     lines.push("## Per-locale detail");

@@ -12,7 +12,7 @@ module.exports = {
         "plugin:vue/vue3-recommended",
         "plugin:vue-scoped-css/vue3-recommended",
         "plugin:jsdoc/recommended-error",
-        "prettier", // Disables ESLint formatting rules that conflict with Prettier
+        "biome", // Disables ESLint rules handled by Biome (formatting + overlapping lint)
     ],
     parser: "vue-eslint-parser",
     parserOptions: {

@@ -45,9 +45,7 @@ function authedEvent(handler, options = {}) {
     const { logNamespace = "authed-event", fallbackMsg } = options;
 
     return async (socket, ...args) => {
-        const callback = args.length > 0 && typeof args[args.length - 1] === "function"
-            ? args[args.length - 1]
-            : null;
+        const callback = args.length > 0 && typeof args[args.length - 1] === "function" ? args[args.length - 1] : null;
 
         try {
             checkLogin(socket);

@@ -79,15 +79,12 @@ class Settings {
             value: JSON.stringify(value),
         };
 
-        await knex("setting")
-            .insert(payload)
-            .onConflict("key")
-            .merge({
-                type: payload.type,
-                value: payload.value,
-            });
+        await knex("setting").insert(payload).onConflict("key").merge({
+            type: payload.type,
+            value: payload.value,
+        });
 
-        Settings.deleteCache([ key ]);
+        Settings.deleteCache([key]);
     }
 
     /**
@@ -127,16 +124,14 @@ class Settings {
 
         await knex.transaction(async (trx) => {
             const existingRows = await trx("setting").whereIn("key", keyList).select("key", "type");
-            const existing = new Map(existingRows.map((r) => [ r.key, r.type ]));
+            const existing = new Map(existingRows.map((r) => [r.key, r.type]));
 
             const inserts = [];
 
             for (const key of keyList) {
                 const value = JSON.stringify(data[key]);
                 if (!existing.has(key)) {
-                    inserts.push({ key,
-                        type,
-                        value });
+                    inserts.push({ key, type, value });
                 } else if (existing.get(key) === type) {
                     await trx("setting").where("key", key).update({ value });
                 }

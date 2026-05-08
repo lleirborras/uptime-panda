@@ -11,37 +11,52 @@ const { onAuthed } = require("../utils/authed-event");
  */
 module.exports.notificationSocketHandler = (socket) => {
     // Add or Edit
-    onAuthed(socket, "addNotification", async (socket, notification, notificationID, callback) => {
-        let notificationBean = await Notification.save(notification, notificationID, socket.userID);
-        await sendNotificationList(socket);
+    onAuthed(
+        socket,
+        "addNotification",
+        async (socket, notification, notificationID, callback) => {
+            let notificationBean = await Notification.save(notification, notificationID, socket.userID);
+            await sendNotificationList(socket);
 
-        callback({
-            ok: true,
-            msg: "Saved.",
-            msgi18n: true,
-            id: notificationBean.id,
-        });
-    }, { fallbackMsg: "Failed to save notification" });
+            callback({
+                ok: true,
+                msg: "Saved.",
+                msgi18n: true,
+                id: notificationBean.id,
+            });
+        },
+        { fallbackMsg: "Failed to save notification" }
+    );
 
-    onAuthed(socket, "deleteNotification", async (socket, notificationID, callback) => {
-        await Notification.delete(notificationID, socket.userID);
-        await sendNotificationList(socket);
+    onAuthed(
+        socket,
+        "deleteNotification",
+        async (socket, notificationID, callback) => {
+            await Notification.delete(notificationID, socket.userID);
+            await sendNotificationList(socket);
 
-        callback({
-            ok: true,
-            msg: "successDeleted",
-            msgi18n: true,
-        });
-    }, { fallbackMsg: "Failed to delete notification" });
+            callback({
+                ok: true,
+                msg: "successDeleted",
+                msgi18n: true,
+            });
+        },
+        { fallbackMsg: "Failed to delete notification" }
+    );
 
-    onAuthed(socket, "testNotification", async (socket, notification, callback) => {
-        let msg = await Notification.send(notification, notification.name + " Testing");
+    onAuthed(
+        socket,
+        "testNotification",
+        async (socket, notification, callback) => {
+            let msg = await Notification.send(notification, notification.name + " Testing");
 
-        callback({
-            ok: true,
-            msg,
-        });
-    }, { fallbackMsg: "Failed to send test notification" });
+            callback({
+                ok: true,
+                msg,
+            });
+        },
+        { fallbackMsg: "Failed to send test notification" }
+    );
 
     // checkApprise: kept as manual handler because its contract is to call back
     // with a bare `false` (not an `{ ok: false, msg }` envelope) when auth or

@@ -102,7 +102,7 @@ library.add(
     faClone,
     faCertificate,
     faFolder,
-    faFolderOpen,
+    faFolderOpen
 );
 
 export { FontAwesomeIcon };

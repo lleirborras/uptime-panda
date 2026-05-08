@@ -34,52 +34,72 @@ cloudflared.error = (errorMessage) => {
  * @returns {void}
  */
 module.exports.cloudflaredSocketHandler = (socket) => {
-    onAuthed(socket, prefix + "join", async (socket) => {
-        socket.join("cloudflared");
-        io.to(socket.userID).emit(prefix + "installed", cloudflared.checkInstalled());
-        io.to(socket.userID).emit(prefix + "running", cloudflared.running);
-        io.to(socket.userID).emit(prefix + "token", await setting("cloudflaredTunnelToken"));
-    }, { logNamespace: "cloudflared",
-        fallbackMsg: "Failed to join cloudflared room" });
+    onAuthed(
+        socket,
+        prefix + "join",
+        async (socket) => {
+            socket.join("cloudflared");
+            io.to(socket.userID).emit(prefix + "installed", cloudflared.checkInstalled());
+            io.to(socket.userID).emit(prefix + "running", cloudflared.running);
+            io.to(socket.userID).emit(prefix + "token", await setting("cloudflaredTunnelToken"));
+        },
+        { logNamespace: "cloudflared", fallbackMsg: "Failed to join cloudflared room" }
+    );
 
-    onAuthed(socket, prefix + "leave", async (socket) => {
-        socket.leave("cloudflared");
-    }, { logNamespace: "cloudflared",
-        fallbackMsg: "Failed to leave cloudflared room" });
+    onAuthed(
+        socket,
+        prefix + "leave",
+        async (socket) => {
+            socket.leave("cloudflared");
+        },
+        { logNamespace: "cloudflared", fallbackMsg: "Failed to leave cloudflared room" }
+    );
 
-    onAuthed(socket, prefix + "start", async (socket, token) => {
-        if (token && typeof token === "string") {
-            await setSetting("cloudflaredTunnelToken", token);
-            cloudflared.token = token;
-        } else {
-            cloudflared.token = null;
-        }
-        cloudflared.start();
-    }, { logNamespace: "cloudflared",
-        fallbackMsg: "Failed to start cloudflared" });
-
-    onAuthed(socket, prefix + "stop", async (socket, currentPassword, callback) => {
-        try {
-            const disabledAuth = await setting("disableAuth");
-            if (!disabledAuth) {
-                await doubleCheckPassword(socket, currentPassword);
+    onAuthed(
+        socket,
+        prefix + "start",
+        async (socket, token) => {
+            if (token && typeof token === "string") {
+                await setSetting("cloudflaredTunnelToken", token);
+                cloudflared.token = token;
+            } else {
+                cloudflared.token = null;
             }
-            cloudflared.stop();
-        } catch (error) {
-            // Preserve original behaviour: only the error path invokes the
-            // callback; success path is silent (UI relies on `running` push).
-            callback({
-                ok: false,
-                msg: error.message,
-            });
-        }
-    }, { logNamespace: "cloudflared",
-        fallbackMsg: "Failed to stop cloudflared" });
+            cloudflared.start();
+        },
+        { logNamespace: "cloudflared", fallbackMsg: "Failed to start cloudflared" }
+    );
 
-    onAuthed(socket, prefix + "removeToken", async () => {
-        await setSetting("cloudflaredTunnelToken", "");
-    }, { logNamespace: "cloudflared",
-        fallbackMsg: "Failed to remove cloudflared token" });
+    onAuthed(
+        socket,
+        prefix + "stop",
+        async (socket, currentPassword, callback) => {
+            try {
+                const disabledAuth = await setting("disableAuth");
+                if (!disabledAuth) {
+                    await doubleCheckPassword(socket, currentPassword);
+                }
+                cloudflared.stop();
+            } catch (error) {
+                // Preserve original behaviour: only the error path invokes the
+                // callback; success path is silent (UI relies on `running` push).
+                callback({
+                    ok: false,
+                    msg: error.message,
+                });
+            }
+        },
+        { logNamespace: "cloudflared", fallbackMsg: "Failed to stop cloudflared" }
+    );
+
+    onAuthed(
+        socket,
+        prefix + "removeToken",
+        async () => {
+            await setSetting("cloudflaredTunnelToken", "");
+        },
+        { logNamespace: "cloudflared", fallbackMsg: "Failed to remove cloudflared token" }
+    );
 };
 
 /**

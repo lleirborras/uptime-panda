@@ -199,11 +199,7 @@ class Maintenance extends BaseModel {
         if (bean.start_date && bean.end_date) {
             const start = new Date(bean.start_date);
             const end = new Date(bean.end_date);
-            if (
-                !isNaN(start.getTime()) &&
-                !isNaN(end.getTime()) &&
-                end.getTime() <= start.getTime()
-            ) {
+            if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end.getTime() <= start.getTime()) {
                 throw new Error("End date must be after start date.");
             }
         }

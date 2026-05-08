@@ -14,104 +14,131 @@ const server = UptimeKumaServer.getInstance();
  * @returns {void}
  */
 module.exports.tagSocketHandler = (socket) => {
-    onAuthed(socket, "getTags", async (socket, callback) => {
-        const list = await Tag.query();
+    onAuthed(
+        socket,
+        "getTags",
+        async (socket, callback) => {
+            const list = await Tag.query();
 
-        callback({
-            ok: true,
-            tags: list.map((bean) => bean.toJSON()),
-        });
-    }, { fallbackMsg: "Failed to retrieve tags" });
-
-    onAuthed(socket, "addTag", async (socket, tag, callback) => {
-        const bean = await Tag.query().insertAndFetch({
-            name: tag.name,
-            color: tag.color,
-        });
-
-        callback({
-            ok: true,
-            tag: await bean.toJSON(),
-        });
-    }, { fallbackMsg: "Failed to add tag" });
-
-    onAuthed(socket, "editTag", async (socket, tag, callback) => {
-        let bean = await Tag.query().findById(tag.id);
-        if (bean == null) {
             callback({
-                ok: false,
-                msg: "tagNotFound",
+                ok: true,
+                tags: list.map((bean) => bean.toJSON()),
+            });
+        },
+        { fallbackMsg: "Failed to retrieve tags" }
+    );
+
+    onAuthed(
+        socket,
+        "addTag",
+        async (socket, tag, callback) => {
+            const bean = await Tag.query().insertAndFetch({
+                name: tag.name,
+                color: tag.color,
+            });
+
+            callback({
+                ok: true,
+                tag: await bean.toJSON(),
+            });
+        },
+        { fallbackMsg: "Failed to add tag" }
+    );
+
+    onAuthed(
+        socket,
+        "editTag",
+        async (socket, tag, callback) => {
+            let bean = await Tag.query().findById(tag.id);
+            if (bean == null) {
+                callback({
+                    ok: false,
+                    msg: "tagNotFound",
+                    msgi18n: true,
+                });
+                return;
+            }
+            bean.name = tag.name;
+            bean.color = tag.color;
+            await bean.$query().patch({ name: bean.name, color: bean.color });
+
+            callback({
+                ok: true,
+                msg: "Saved.",
+                msgi18n: true,
+                tag: await bean.toJSON(),
+            });
+        },
+        { fallbackMsg: "Failed to edit tag" }
+    );
+
+    onAuthed(
+        socket,
+        "deleteTag",
+        async (socket, tagID, callback) => {
+            await getKnex()("tag").where("id", tagID).delete();
+
+            callback({
+                ok: true,
+                msg: "successDeleted",
                 msgi18n: true,
             });
-            return;
-        }
-        bean.name = tag.name;
-        bean.color = tag.color;
-        await bean.$query().patch({ name: bean.name,
-            color: bean.color });
+        },
+        { fallbackMsg: "Failed to delete tag" }
+    );
 
-        callback({
-            ok: true,
-            msg: "Saved.",
-            msgi18n: true,
-            tag: await bean.toJSON(),
-        });
-    }, { fallbackMsg: "Failed to edit tag" });
-
-    onAuthed(socket, "deleteTag", async (socket, tagID, callback) => {
-        await getKnex()("tag").where("id", tagID).delete();
-
-        callback({
-            ok: true,
-            msg: "successDeleted",
-            msgi18n: true,
-        });
-    }, { fallbackMsg: "Failed to delete tag" });
-
-    onAuthed(socket, "addMonitorTag", async (socket, tagID, monitorID, value, callback) => {
-        await getKnex()("monitor_tag").insert({
-            tag_id: tagID,
-            monitor_id: monitorID,
-            value,
-        });
-
-        await server.sendUpdateMonitorIntoList(socket, monitorID);
-
-        callback({
-            ok: true,
-            msg: "successAdded",
-            msgi18n: true,
-        });
-    }, { fallbackMsg: "Failed to add monitor tag" });
-
-    onAuthed(socket, "editMonitorTag", async (socket, tagID, monitorID, value, callback) => {
-        await getKnex()("monitor_tag")
-            .where({ tag_id: tagID,
-                monitor_id: monitorID })
-            .update({ value });
-
-        await server.sendUpdateMonitorIntoList(socket, monitorID);
-
-        callback({
-            ok: true,
-            msg: "successEdited",
-            msgi18n: true,
-        });
-    }, { fallbackMsg: "Failed to edit monitor tag" });
-
-    onAuthed(socket, "deleteMonitorTag", async (socket, tagID, monitorID, value, callback) => {
-        await getKnex()("monitor_tag")
-            .where({ tag_id: tagID,
+    onAuthed(
+        socket,
+        "addMonitorTag",
+        async (socket, tagID, monitorID, value, callback) => {
+            await getKnex()("monitor_tag").insert({
+                tag_id: tagID,
                 monitor_id: monitorID,
-                value })
-            .delete();
+                value,
+            });
 
-        await server.sendUpdateMonitorIntoList(socket, monitorID);
+            await server.sendUpdateMonitorIntoList(socket, monitorID);
 
-        callback({
-            ok: true,
-            msg: "successDeleted",
-            msgi18n: true,
-        });
-    }, { fallbackMsg: "Failed to delete monitor tag" });
+            callback({
+                ok: true,
+                msg: "successAdded",
+                msgi18n: true,
+            });
+        },
+        { fallbackMsg: "Failed to add monitor tag" }
+    );
+
+    onAuthed(
+        socket,
+        "editMonitorTag",
+        async (socket, tagID, monitorID, value, callback) => {
+            await getKnex()("monitor_tag").where({ tag_id: tagID, monitor_id: monitorID }).update({ value });
+
+            await server.sendUpdateMonitorIntoList(socket, monitorID);
+
+            callback({
+                ok: true,
+                msg: "successEdited",
+                msgi18n: true,
+            });
+        },
+        { fallbackMsg: "Failed to edit monitor tag" }
+    );
+
+    onAuthed(
+        socket,
+        "deleteMonitorTag",
+        async (socket, tagID, monitorID, value, callback) => {
+            await getKnex()("monitor_tag").where({ tag_id: tagID, monitor_id: monitorID, value }).delete();
+
+            await server.sendUpdateMonitorIntoList(socket, monitorID);
+
+            callback({
+                ok: true,
+                msg: "successDeleted",
+                msgi18n: true,
+            });
+        },
+        { fallbackMsg: "Failed to delete monitor tag" }
+    );
 };

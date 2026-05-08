@@ -27,3 +27,4 @@ extra/exe-builder/obj
 
 # Local-only design notes
 ORM_MIGRATION_PLAN.md
+.claude/

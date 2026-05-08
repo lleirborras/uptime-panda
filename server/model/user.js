@@ -15,9 +15,11 @@ class User extends BaseModel {
      * @returns {Promise<void>}
      */
     static async resetPassword(userID, newPassword) {
-        await getKnex()("user").where("id", userID).update({
-            password: await passwordHash.generate(newPassword),
-        });
+        await getKnex()("user")
+            .where("id", userID)
+            .update({
+                password: await passwordHash.generate(newPassword),
+            });
     }
 
     /**

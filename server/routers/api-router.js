@@ -62,8 +62,7 @@ router.all("/api/push/:pushToken", async (request, response) => {
             throw new UserFacingError(`Invalid ping value. Must be between 0 and ${MAX_PING_MS} ms.`);
         }
 
-        let monitor = await Monitor.query().where({ push_token: pushToken,
-            active: true }).first();
+        let monitor = await Monitor.query().where({ push_token: pushToken, active: true }).first();
 
         if (!monitor) {
             throw new UserFacingError("Monitor not found or not active.");

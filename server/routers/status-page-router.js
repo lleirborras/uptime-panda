@@ -81,10 +81,7 @@ router.get("/api/status-page/heartbeat/:slug", cache("1 minutes"), async (reques
             .pluck("monitor_group.monitor_id");
 
         for (let monitorID of monitorIDList) {
-            const list = await Heartbeat.query()
-                .where("monitor_id", monitorID)
-                .orderBy("time", "desc")
-                .limit(100);
+            const list = await Heartbeat.query().where("monitor_id", monitorID).orderBy("time", "desc").limit(100);
 
             heartbeatList[monitorID] = list.reverse().map((row) => row.toPublicJSON());
 
@@ -187,10 +184,7 @@ router.get("/api/status-page/:slug/badge", cache("5 minutes"), async (request, r
 
         for (let monitorID of monitorIDList) {
             // retrieve the latest heartbeat
-            const beat = await knex("heartbeat")
-                .where("monitor_id", monitorID)
-                .orderBy("time", "desc")
-                .limit(1);
+            const beat = await knex("heartbeat").where("monitor_id", monitorID).orderBy("time", "desc").limit(1);
 
             // to be sure, when corresponding monitor not found
             if (beat.length === 0) {

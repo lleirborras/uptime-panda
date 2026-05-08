@@ -5,14 +5,14 @@ const { EmbeddedMariadbDialect } = require("./embedded-mariadb");
 const { PostgresDialect } = require("./postgres");
 
 const REGISTRY = new Map(
-    [ SqliteDialect, MariadbDialect, EmbeddedMariadbDialect, PostgresDialect ].map((C) => [ C.type, C ])
+    [SqliteDialect, MariadbDialect, EmbeddedMariadbDialect, PostgresDialect].map((C) => [C.type, C])
 );
 
 /**
  * @returns {string[]} All registered dialect type identifiers
  */
 function supportedTypes() {
-    return [ ...REGISTRY.keys() ];
+    return [...REGISTRY.keys()];
 }
 
 /**

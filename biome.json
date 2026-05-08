@@ -1,0 +1,79 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.4.14/schema.json",
+    "vcs": {
+        "enabled": true,
+        "clientKind": "git",
+        "useIgnoreFile": true
+    },
+    "files": {
+        "includes": [
+            "**/*.js",
+            "**/*.ts",
+            "**/*.jsx",
+            "**/*.tsx",
+            "**/*.json",
+            "**/*.css",
+            "**/*.scss",
+            "!**/*.vue",
+            "!src/lang/*.json",
+            "!server/modules/**",
+            "!src/util.js",
+            "!test/**",
+            "!db/knex_migrations/**"
+        ]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineWidth": 120,
+        "lineEnding": "lf"
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double",
+            "semicolons": "always",
+            "trailingCommas": "es5",
+            "arrowParentheses": "always",
+            "bracketSpacing": true,
+            "bracketSameLine": false
+        }
+    },
+    "json": {
+        "formatter": {
+            "enabled": true,
+            "trailingCommas": "none"
+        }
+    },
+    "css": {
+        "formatter": {
+            "enabled": true,
+            "quoteStyle": "double"
+        },
+        "linter": {
+            "enabled": true
+        }
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true,
+            "style": {
+                "useConst": "warn",
+                "noUnusedTemplateLiteral": "warn",
+                "useTemplate": "warn",
+                "noYodaExpression": "error"
+            },
+            "suspicious": {
+                "noDoubleEquals": "warn",
+                "noVar": "error",
+                "noControlCharactersInRegex": "off",
+                "noAssignInExpressions": "off",
+                "noImplicitAnyLet": "off"
+            },
+            "correctness": {
+                "noUnusedVariables": "warn"
+            }
+        }
+    }
+}

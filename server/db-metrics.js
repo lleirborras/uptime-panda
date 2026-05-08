@@ -18,9 +18,7 @@ const DEFAULT_POLL_INTERVAL_MS = 5000;
  */
 function registerPoolGauges() {
     if (poolUsedGauge && poolFreeGauge && poolPendingGauge) {
-        return { poolUsedGauge,
-            poolFreeGauge,
-            poolPendingGauge };
+        return { poolUsedGauge, poolFreeGauge, poolPendingGauge };
     }
 
     poolUsedGauge = getOrCreateGauge({
@@ -38,9 +36,7 @@ function registerPoolGauges() {
         help: "Number of pending acquire requests waiting on the Knex pool (numPendingAcquires).",
     });
 
-    return { poolUsedGauge,
-        poolFreeGauge,
-        poolPendingGauge };
+    return { poolUsedGauge, poolFreeGauge, poolPendingGauge };
 }
 
 /**

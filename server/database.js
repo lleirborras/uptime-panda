@@ -24,15 +24,24 @@ function parseMaxPoolConnections() {
     }
     const parsed = parseInt(raw);
     if (Number.isNaN(parsed)) {
-        log.warn("db", "Max database connections defaulted to 10 because UPTIME_KUMA_DB_POOL_MAX_CONNECTIONS was invalid.");
+        log.warn(
+            "db",
+            "Max database connections defaulted to 10 because UPTIME_KUMA_DB_POOL_MAX_CONNECTIONS was invalid."
+        );
         return 10;
     }
     if (parsed < 1) {
-        log.warn("db", "Max database connections defaulted to 10 because UPTIME_KUMA_DB_POOL_MAX_CONNECTIONS was less than 1.");
+        log.warn(
+            "db",
+            "Max database connections defaulted to 10 because UPTIME_KUMA_DB_POOL_MAX_CONNECTIONS was less than 1."
+        );
         return 10;
     }
     if (parsed > 100) {
-        log.warn("db", "Max database connections capped to 100 because Mysql/Mariadb connections are heavy. consider using a proxy like ProxySQL or MaxScale.");
+        log.warn(
+            "db",
+            "Max database connections capped to 100 because Mysql/Mariadb connections are heavy. consider using a proxy like ProxySQL or MaxScale."
+        );
         return 100;
     }
     return parsed;
@@ -250,11 +259,13 @@ class Database {
 
         await dialect.preConnect();
 
-        const knexInstance = knex(dialect.buildKnexConfig({
-            testMode,
-            acquireConnectionTimeout,
-            poolMaxConnections,
-        }));
+        const knexInstance = knex(
+            dialect.buildKnexConfig({
+                testMode,
+                acquireConnectionTimeout,
+                poolMaxConnections,
+            })
+        );
         setupKnex(knexInstance);
         enableSQLDebugLogging(knexInstance);
 
@@ -346,13 +357,13 @@ class Database {
             // runs on the same backend session — otherwise the unlock could
             // land on a different session and leak the lock until disconnect.
             // Deterministic 32-bit key derived from ASCII "UKMA" (Uptime Kuma).
-            const LOCK_KEY = 0x554B4D41;
+            const LOCK_KEY = 0x554b4d41;
             log.info("db", "Acquiring pg_advisory_lock for migrations");
             const lockConn = await knex.client.acquireConnection();
             try {
                 await knex.client.query(lockConn, {
                     sql: "SELECT pg_advisory_lock(?)",
-                    bindings: [ LOCK_KEY ],
+                    bindings: [LOCK_KEY],
                 });
                 try {
                     await fn();
@@ -360,7 +371,7 @@ class Database {
                     try {
                         await knex.client.query(lockConn, {
                             sql: "SELECT pg_advisory_unlock(?)",
-                            bindings: [ LOCK_KEY ],
+                            bindings: [LOCK_KEY],
                         });
                     } catch (releaseErr) {
                         log.warn("db", `Failed to release pg_advisory_lock: ${releaseErr.message}`);
@@ -385,12 +396,14 @@ class Database {
             try {
                 const acquireRes = await knex.client.query(lockConn, {
                     sql: "SELECT GET_LOCK(?, ?) AS acquired",
-                    bindings: [ LOCK_NAME, LOCK_TIMEOUT_SECONDS ],
+                    bindings: [LOCK_NAME, LOCK_TIMEOUT_SECONDS],
                 });
                 // mysql2 driver: client.query() resolves with the queryObject
                 // whose `response` is `[rows, fields]`. Be defensive about
                 // future driver shape changes.
-                const rows = Array.isArray(acquireRes?.response) ? acquireRes.response[0] : acquireRes?.rows ?? acquireRes;
+                const rows = Array.isArray(acquireRes?.response)
+                    ? acquireRes.response[0]
+                    : (acquireRes?.rows ?? acquireRes);
                 const acquired = Array.isArray(rows) ? rows[0]?.acquired : rows?.acquired;
                 if (Number(acquired) !== 1) {
                     throw new Error(`Could not acquire migration lock '${LOCK_NAME}' within ${LOCK_TIMEOUT_SECONDS}s`);
@@ -401,7 +414,7 @@ class Database {
                     try {
                         await knex.client.query(lockConn, {
                             sql: "SELECT RELEASE_LOCK(?)",
-                            bindings: [ LOCK_NAME ],
+                            bindings: [LOCK_NAME],
                         });
                     } catch (releaseErr) {
                         log.warn("db", `Failed to release GET_LOCK: ${releaseErr.message}`);
@@ -777,9 +790,7 @@ class Database {
 
         const knex = getKnex();
         // Get a list of unique monitors from the heartbeat table
-        let monitors = await knex("heartbeat")
-            .distinct("monitor_id")
-            .orderBy("monitor_id", "asc");
+        let monitors = await knex("heartbeat").distinct("monitor_id").orderBy("monitor_id", "asc");
 
         // Stop if stat_* tables are not empty
         for (let table of ["stat_minutely", "stat_hourly", "stat_daily"]) {

@@ -8,6 +8,7 @@ const { CookieJar } = require("tough-cookie");
 const { createCookieAgent } = require("http-cookie-agent/http");
 const ProxyModel = require("./model/proxy");
 
+// biome-ignore lint/suspicious/noShadowRestrictedNames: class name predates JS Proxy global; rename is a larger refactor
 class Proxy {
     static SUPPORTED_PROXY_PROTOCOLS = ["http", "https", "socks", "socks5", "socks5h", "socks4"];
 
@@ -47,8 +48,7 @@ class Proxy {
 
         let bean;
         if (proxyID) {
-            const existing = await ProxyModel.query().where({ id: proxyID,
-                user_id: userID }).first();
+            const existing = await ProxyModel.query().where({ id: proxyID, user_id: userID }).first();
             if (!existing) {
                 throw new Error("proxy not found");
             }
@@ -72,8 +72,7 @@ class Proxy {
      */
     static async delete(proxyID, userID) {
         const knex = getKnex();
-        const existing = await knex("proxy").where({ id: proxyID,
-            user_id: userID }).first();
+        const existing = await knex("proxy").where({ id: proxyID, user_id: userID }).first();
         if (!existing) {
             throw new Error("proxy not found");
         }
@@ -117,7 +116,7 @@ class Proxy {
 
         switch (proxy.protocol) {
             case "http":
-            case "https":
+            case "https": {
                 // eslint-disable-next-line no-case-declarations
                 const HttpCookieProxyAgent = createCookieAgent(HttpProxyAgent);
                 // eslint-disable-next-line no-case-declarations
@@ -133,10 +132,11 @@ class Proxy {
                 });
 
                 break;
+            }
             case "socks":
             case "socks5":
             case "socks5h":
-            case "socks4":
+            case "socks4": {
                 // eslint-disable-next-line no-case-declarations
                 const SocksCookieProxyAgent = createCookieAgent(SocksProxyAgent);
                 agent = new SocksCookieProxyAgent(proxyUrl.toString(), {
@@ -150,6 +150,7 @@ class Proxy {
                 httpAgent = agent;
                 httpsAgent = agent;
                 break;
+            }
 
             default:
                 throw new Error(`Unsupported proxy protocol provided. ${proxy.protocol}`);

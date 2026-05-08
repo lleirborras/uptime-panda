@@ -1,5 +1,5 @@
 const jsesc = require("jsesc");
-const { escape } = require("html-escaper");
+const { escape: htmlEscape } = require("html-escaper");
 
 /**
  * Returns a string that represents the javascript that is required to insert the Matomo Analytics script
@@ -21,10 +21,10 @@ function getMatomoAnalyticsScript(matomoUrl, siteId) {
     }
 
     // Escape the domain url for use in an HTML attribute.
-    let escapedMatomoUrlHTMLAttribute = escape(escapedMatomoUrlJS);
+    let escapedMatomoUrlHTMLAttribute = htmlEscape(escapedMatomoUrlJS);
 
     // Escape the website id for use in an HTML attribute.
-    let escapedSiteIdHTMLAttribute = escape(escapedSiteIdJS);
+    let escapedSiteIdHTMLAttribute = htmlEscape(escapedSiteIdJS);
 
     return `
         <script type="text/javascript">
