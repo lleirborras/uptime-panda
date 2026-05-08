@@ -107,6 +107,8 @@ module.exports = {
                 "jsdoc/require-param-type": "off",
                 "@typescript-eslint/no-explicit-any": "off",
                 "prefer-const": "off",
+                // Codebase mixes CJS require() in .ts files; suppress the v8 rule.
+                "@typescript-eslint/no-require-imports": "off",
             },
         },
     ],
