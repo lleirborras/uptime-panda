@@ -64,7 +64,7 @@ jobs:
           context: .
           file: docker/dockerfile
           target: release
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -89,8 +89,8 @@ jobs:
         with:
           context: .
           file: docker/dockerfile
-          target: root
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          target: rootless
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta-root.outputs.tags }}
           labels: ${{ steps.meta-root.outputs.labels }}
