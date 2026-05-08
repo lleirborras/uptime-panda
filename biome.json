@@ -17,7 +17,9 @@
             "!**/*.vue",
             "!src/lang/*.json",
             "!server/modules/**",
-            "!src/util.js"
+            "!src/util.js",
+            "!test/**",
+            "!db/knex_migrations/**"
         ]
     },
     "formatter": {

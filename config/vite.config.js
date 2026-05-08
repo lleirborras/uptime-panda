@@ -51,7 +51,7 @@ export default defineConfig({
         },
         rollupOptions: {
             output: {
-                manualChunks(id, { getModuleInfo, getModuleIds }) {},
+                manualChunks(_id, { getModuleInfo: _getModuleInfo, getModuleIds: _getModuleIds }) {},
             },
         },
     },
