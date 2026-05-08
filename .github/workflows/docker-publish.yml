@@ -102,6 +102,7 @@ jobs:
   deploy:
     needs: docker
     runs-on: ubuntu-latest
+    environment: production
     permissions:
       contents: read
 
