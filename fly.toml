@@ -1,9 +1,11 @@
 # Fly.io deployment configuration for uptime-panda.
 # First-time setup (run once locally):
+#   brew install flyctl
+#   fly auth login
 #   fly apps create uptime-panda          # or choose your own app name
 #   fly volumes create uptime_data --size 1 --region fra
-#   fly secrets set FLY_API_TOKEN=...    # not needed here, but for reference
-# Then add FLY_API_TOKEN to GitHub Actions secrets.
+# Then add FLY_API_TOKEN to GitHub Actions secrets:
+#   gh secret set FLY_API_TOKEN --repo lleirborras/uptime-panda
 
 app = "uptime-panda"
 primary_region = "fra"
