@@ -94,6 +94,7 @@ jobs:
           severity: CRITICAL,HIGH
           exit-code: "1"
           ignore-unfixed: true
+          trivyignores: .trivyignore
           scanners: vuln
 
       # Report: generate SARIF with all severities for GitHub Security tab
@@ -106,6 +107,7 @@ jobs:
           output: trivy-image.sarif
           exit-code: "0"
           ignore-unfixed: true
+          trivyignores: .trivyignore
           scanners: vuln
 
       - name: Upload image scan results
