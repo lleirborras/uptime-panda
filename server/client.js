@@ -48,10 +48,7 @@ async function sendNotificationList(socket) {
  * @returns {Promise<void>}
  */
 async function sendHeartbeatList(socket, monitorID, toUser = false, overwrite = false) {
-    let list = await getKnex()("heartbeat")
-        .where("monitor_id", monitorID)
-        .orderBy("time", "desc")
-        .limit(100);
+    let list = await getKnex()("heartbeat").where("monitor_id", monitorID).orderBy("time", "desc").limit(100);
 
     let result = list.reverse();
 
@@ -75,8 +72,7 @@ async function sendImportantHeartbeatList(socket, monitorID, toUser = false, ove
 
     const Heartbeat = require("./model/heartbeat");
     let list = await Heartbeat.query()
-        .where({ monitor_id: monitorID,
-            important: true })
+        .where({ monitor_id: monitorID, important: true })
         .orderBy("time", "desc")
         .limit(500);
 

@@ -467,8 +467,7 @@ class GlobalpingMonitorType extends MonitorType {
                 ) {
                     log.debug("monitor", "Resetting sent_history");
                     await knex("notification_sent_history")
-                        .where({ type: "certificate",
-                            monitor_id: monitor.id })
+                        .where({ type: "certificate", monitor_id: monitor.id })
                         .delete();
                 }
             } catch (e) {}

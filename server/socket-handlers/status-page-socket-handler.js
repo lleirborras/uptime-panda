@@ -35,52 +35,60 @@ function validateIncident(incident) {
  */
 module.exports.statusPageSocketHandler = (socket) => {
     // Post or edit incident
-    onAuthed(socket, "postIncident", async (socket, slug, incident, callback) => {
-        let statusPageID = await StatusPage.slugToID(slug);
+    onAuthed(
+        socket,
+        "postIncident",
+        async (socket, slug, incident, callback) => {
+            let statusPageID = await StatusPage.slugToID(slug);
 
-        if (!statusPageID) {
-            throw new UserFacingError("slug is not found");
-        }
+            if (!statusPageID) {
+                throw new UserFacingError("slug is not found");
+            }
 
-        let incidentBean = null;
-        if (incident.id) {
-            incidentBean = await Incident.query().where({ id: incident.id,
-                status_page_id: statusPageID }).first();
-        }
+            let incidentBean = null;
+            if (incident.id) {
+                incidentBean = await Incident.query().where({ id: incident.id, status_page_id: statusPageID }).first();
+            }
 
-        const payload = {
-            title: incident.title,
-            content: incident.content,
-            style: incident.style,
-            pin: true,
-            active: true,
-            status_page_id: statusPageID,
-        };
+            const payload = {
+                title: incident.title,
+                content: incident.content,
+                style: incident.style,
+                pin: true,
+                active: true,
+                status_page_id: statusPageID,
+            };
 
-        if (incidentBean) {
-            payload.last_updated_date = isoDateTime(dayjs.utc());
-            incidentBean = await incidentBean.$query().patchAndFetch(payload);
-        } else {
-            payload.created_date = isoDateTime(dayjs.utc());
-            incidentBean = await Incident.query().insertAndFetch(payload);
-        }
+            if (incidentBean) {
+                payload.last_updated_date = isoDateTime(dayjs.utc());
+                incidentBean = await incidentBean.$query().patchAndFetch(payload);
+            } else {
+                payload.created_date = isoDateTime(dayjs.utc());
+                incidentBean = await Incident.query().insertAndFetch(payload);
+            }
 
-        callback({
-            ok: true,
-            incident: incidentBean.toPublicJSON(),
-        });
-    }, { fallbackMsg: "Failed to post incident" });
+            callback({
+                ok: true,
+                incident: incidentBean.toPublicJSON(),
+            });
+        },
+        { fallbackMsg: "Failed to post incident" }
+    );
 
-    onAuthed(socket, "unpinIncident", async (socket, slug, callback) => {
-        let statusPageID = await StatusPage.slugToID(slug);
+    onAuthed(
+        socket,
+        "unpinIncident",
+        async (socket, slug, callback) => {
+            let statusPageID = await StatusPage.slugToID(slug);
 
-        await getKnex()("incident").where({ pin: true,
-            status_page_id: statusPageID }).update({ pin: false });
+            await getKnex()("incident").where({ pin: true, status_page_id: statusPageID }).update({ pin: false });
 
-        callback({
-            ok: true,
-        });
-    }, { fallbackMsg: "Failed to unpin incident" });
+            callback({
+                ok: true,
+            });
+        },
+        { fallbackMsg: "Failed to unpin incident" }
+    );
 
     // getIncidentHistory: deliberately NOT wrapped in onAuthed.
     // The public status-page UI calls this without a session, and the handler
@@ -105,333 +113,362 @@ module.exports.statusPageSocketHandler = (socket) => {
         }
     });
 
-    onAuthed(socket, "editIncident", async (socket, slug, incidentID, incident, callback) => {
-        let statusPageID = await StatusPage.slugToID(slug);
-        if (!statusPageID) {
+    onAuthed(
+        socket,
+        "editIncident",
+        async (socket, slug, incidentID, incident, callback) => {
+            let statusPageID = await StatusPage.slugToID(slug);
+            if (!statusPageID) {
+                callback({
+                    ok: false,
+                    msg: "slug is not found",
+                    msgi18n: true,
+                });
+                return;
+            }
+
+            let bean = await Incident.query().where({ id: incidentID, status_page_id: statusPageID }).first();
+            if (!bean) {
+                callback({
+                    ok: false,
+                    msg: "Incident not found or access denied",
+                    msgi18n: true,
+                });
+                return;
+            }
+
+            validateIncident(incident);
+
+            const validStyles = ["info", "warning", "danger", "primary", "light", "dark"];
+            if (!validStyles.includes(incident.style)) {
+                incident.style = "warning";
+            }
+
+            bean = await bean.$query().patchAndFetch({
+                title: incident.title,
+                content: incident.content,
+                style: incident.style,
+                pin: incident.pin !== false,
+                last_updated_date: isoDateTime(dayjs.utc()),
+            });
+
             callback({
-                ok: false,
-                msg: "slug is not found",
+                ok: true,
+                msg: "Saved.",
+                msgi18n: true,
+                incident: bean.toPublicJSON(),
+            });
+        },
+        { fallbackMsg: "Failed to edit incident" }
+    );
+
+    onAuthed(
+        socket,
+        "deleteIncident",
+        async (socket, slug, incidentID, callback) => {
+            let statusPageID = await StatusPage.slugToID(slug);
+            if (!statusPageID) {
+                callback({
+                    ok: false,
+                    msg: "slug is not found",
+                    msgi18n: true,
+                });
+                return;
+            }
+
+            const deleted = await Incident.query().where({ id: incidentID, status_page_id: statusPageID }).delete();
+            if (deleted === 0) {
+                callback({
+                    ok: false,
+                    msg: "Incident not found or access denied",
+                    msgi18n: true,
+                });
+                return;
+            }
+
+            callback({
+                ok: true,
+                msg: "successDeleted",
                 msgi18n: true,
             });
-            return;
-        }
+        },
+        { fallbackMsg: "Failed to delete incident" }
+    );
 
-        let bean = await Incident.query().where({ id: incidentID,
-            status_page_id: statusPageID }).first();
-        if (!bean) {
+    onAuthed(
+        socket,
+        "resolveIncident",
+        async (socket, slug, incidentID, callback) => {
+            let statusPageID = await StatusPage.slugToID(slug);
+            if (!statusPageID) {
+                callback({
+                    ok: false,
+                    msg: "slug is not found",
+                    msgi18n: true,
+                });
+                return;
+            }
+
+            let bean = await Incident.query().where({ id: incidentID, status_page_id: statusPageID }).first();
+            if (!bean) {
+                callback({
+                    ok: false,
+                    msg: "Incident not found or access denied",
+                    msgi18n: true,
+                });
+                return;
+            }
+
+            await bean.resolve();
+
             callback({
-                ok: false,
-                msg: "Incident not found or access denied",
+                ok: true,
+                msg: "Resolved",
                 msgi18n: true,
+                incident: bean.toPublicJSON(),
             });
-            return;
-        }
+        },
+        { fallbackMsg: "Failed to resolve incident" }
+    );
 
-        validateIncident(incident);
+    onAuthed(
+        socket,
+        "getStatusPage",
+        async (socket, slug, callback) => {
+            let statusPage = await StatusPage.query().where("slug", slug).first();
 
-        const validStyles = ["info", "warning", "danger", "primary", "light", "dark"];
-        if (!validStyles.includes(incident.style)) {
-            incident.style = "warning";
-        }
+            if (!statusPage) {
+                throw new UserFacingError("No slug?");
+            }
 
-        bean = await bean.$query().patchAndFetch({
-            title: incident.title,
-            content: incident.content,
-            style: incident.style,
-            pin: incident.pin !== false,
-            last_updated_date: isoDateTime(dayjs.utc()),
-        });
-
-        callback({
-            ok: true,
-            msg: "Saved.",
-            msgi18n: true,
-            incident: bean.toPublicJSON(),
-        });
-    }, { fallbackMsg: "Failed to edit incident" });
-
-    onAuthed(socket, "deleteIncident", async (socket, slug, incidentID, callback) => {
-        let statusPageID = await StatusPage.slugToID(slug);
-        if (!statusPageID) {
             callback({
-                ok: false,
-                msg: "slug is not found",
-                msgi18n: true,
+                ok: true,
+                config: await statusPage.toJSON(),
             });
-            return;
-        }
-
-        const deleted = await Incident.query().where({ id: incidentID,
-            status_page_id: statusPageID }).delete();
-        if (deleted === 0) {
-            callback({
-                ok: false,
-                msg: "Incident not found or access denied",
-                msgi18n: true,
-            });
-            return;
-        }
-
-        callback({
-            ok: true,
-            msg: "successDeleted",
-            msgi18n: true,
-        });
-    }, { fallbackMsg: "Failed to delete incident" });
-
-    onAuthed(socket, "resolveIncident", async (socket, slug, incidentID, callback) => {
-        let statusPageID = await StatusPage.slugToID(slug);
-        if (!statusPageID) {
-            callback({
-                ok: false,
-                msg: "slug is not found",
-                msgi18n: true,
-            });
-            return;
-        }
-
-        let bean = await Incident.query().where({ id: incidentID,
-            status_page_id: statusPageID }).first();
-        if (!bean) {
-            callback({
-                ok: false,
-                msg: "Incident not found or access denied",
-                msgi18n: true,
-            });
-            return;
-        }
-
-        await bean.resolve();
-
-        callback({
-            ok: true,
-            msg: "Resolved",
-            msgi18n: true,
-            incident: bean.toPublicJSON(),
-        });
-    }, { fallbackMsg: "Failed to resolve incident" });
-
-    onAuthed(socket, "getStatusPage", async (socket, slug, callback) => {
-        let statusPage = await StatusPage.query().where("slug", slug).first();
-
-        if (!statusPage) {
-            throw new UserFacingError("No slug?");
-        }
-
-        callback({
-            ok: true,
-            config: await statusPage.toJSON(),
-        });
-    }, { fallbackMsg: "Failed to retrieve status page" });
+        },
+        { fallbackMsg: "Failed to retrieve status page" }
+    );
 
     // Save Status Page
     // imgDataUrl Only Accept PNG!
-    onAuthed(socket, "saveStatusPage", async (socket, slug, config, imgDataUrl, publicGroupList, callback) => {
-        // Save Config
-        let statusPage = await StatusPage.query().where("slug", slug).first();
+    onAuthed(
+        socket,
+        "saveStatusPage",
+        async (socket, slug, config, imgDataUrl, publicGroupList, callback) => {
+            // Save Config
+            let statusPage = await StatusPage.query().where("slug", slug).first();
 
-        if (!statusPage) {
-            throw new UserFacingError("No slug?");
-        }
-
-        checkSlug(config.slug);
-
-        const header = "data:image/png;base64,";
-
-        // Check logo format
-        // If is image data url, convert to png file
-        // Else assume it is a url, nothing to do
-        if (imgDataUrl.startsWith("data:")) {
-            if (!imgDataUrl.startsWith(header)) {
-                throw new UserFacingError("Only allowed PNG logo.");
+            if (!statusPage) {
+                throw new UserFacingError("No slug?");
             }
 
-            const filename = `logo${statusPage.id}.png`;
+            checkSlug(config.slug);
 
-            // Convert to file
-            await ImageDataURI.outputFile(imgDataUrl, Database.uploadDir + filename);
-            config.logo = `/upload/${filename}?t=` + Date.now();
-        } else {
-            config.logo = imgDataUrl;
-        }
+            const header = "data:image/png;base64,";
 
-        const validAnalyticsTypes = ["google", "umami", "plausible", "matomo"];
-        if (config.analyticsType !== null && !validAnalyticsTypes.includes(config.analyticsType)) {
-            throw new UserFacingError("Invalid analytics type");
-        }
+            // Check logo format
+            // If is image data url, convert to png file
+            // Else assume it is a url, nothing to do
+            if (imgDataUrl.startsWith("data:")) {
+                if (!imgDataUrl.startsWith(header)) {
+                    throw new UserFacingError("Only allowed PNG logo.");
+                }
 
-        const statusPagePayload = {
-            slug: config.slug,
-            title: config.title,
-            description: config.description,
-            icon: config.logo,
-            auto_refresh_interval: config.autoRefreshInterval,
-            theme: config.theme,
-            show_tags: config.showTags,
-            footer_text: config.footerText,
-            custom_css: config.customCSS,
-            show_powered_by: config.showPoweredBy,
-            rss_title: config.rssTitle,
-            show_only_last_heartbeat: config.showOnlyLastHeartbeat,
-            show_certificate_expiry: config.showCertificateExpiry,
-            modified_date: isoDateTime(),
-            analytics_id: config.analyticsId,
-            analytics_script_url: config.analyticsScriptUrl,
-            analytics_type: config.analyticsType,
-        };
+                const filename = `logo${statusPage.id}.png`;
 
-        Object.assign(statusPage, statusPagePayload);
+                // Convert to file
+                await ImageDataURI.outputFile(imgDataUrl, Database.uploadDir + filename);
+                config.logo = `/upload/${filename}?t=` + Date.now();
+            } else {
+                config.logo = imgDataUrl;
+            }
 
-        await statusPage.$query().patchAndFetch(statusPagePayload);
+            const validAnalyticsTypes = ["google", "umami", "plausible", "matomo"];
+            if (config.analyticsType !== null && !validAnalyticsTypes.includes(config.analyticsType)) {
+                throw new UserFacingError("Invalid analytics type");
+            }
 
-        await statusPage.updateDomainNameList(config.domainNameList);
-        await StatusPage.loadDomainMappingList();
-
-        // Save Public Group List
-        const groupIDList = [];
-        let groupOrder = 1;
-
-        const knex = getKnex();
-        for (let group of publicGroupList) {
-            const payload = {
-                status_page_id: statusPage.id,
-                name: group.name,
-                public: true,
-                weight: groupOrder++,
+            const statusPagePayload = {
+                slug: config.slug,
+                title: config.title,
+                description: config.description,
+                icon: config.logo,
+                auto_refresh_interval: config.autoRefreshInterval,
+                theme: config.theme,
+                show_tags: config.showTags,
+                footer_text: config.footerText,
+                custom_css: config.customCSS,
+                show_powered_by: config.showPoweredBy,
+                rss_title: config.rssTitle,
+                show_only_last_heartbeat: config.showOnlyLastHeartbeat,
+                show_certificate_expiry: config.showCertificateExpiry,
+                modified_date: isoDateTime(),
+                analytics_id: config.analyticsId,
+                analytics_script_url: config.analyticsScriptUrl,
+                analytics_type: config.analyticsType,
             };
 
-            let groupBean;
-            if (group.id) {
-                groupBean = await Group.query().where({ id: group.id,
+            Object.assign(statusPage, statusPagePayload);
+
+            await statusPage.$query().patchAndFetch(statusPagePayload);
+
+            await statusPage.updateDomainNameList(config.domainNameList);
+            await StatusPage.loadDomainMappingList();
+
+            // Save Public Group List
+            const groupIDList = [];
+            let groupOrder = 1;
+
+            const knex = getKnex();
+            for (let group of publicGroupList) {
+                const payload = {
+                    status_page_id: statusPage.id,
+                    name: group.name,
                     public: true,
-                    status_page_id: statusPage.id }).first();
-            }
-
-            if (groupBean) {
-                groupBean = await groupBean.$query().patchAndFetch(payload);
-            } else {
-                groupBean = await Group.query().insertAndFetch(payload);
-            }
-
-            await knex("monitor_group").where("group_id", groupBean.id).delete();
-
-            let monitorOrder = 1;
-
-            for (let monitor of group.monitorList) {
-                const relationPayload = {
-                    weight: monitorOrder++,
-                    group_id: groupBean.id,
-                    monitor_id: monitor.id,
+                    weight: groupOrder++,
                 };
-                if (monitor.sendUrl !== undefined) {
-                    relationPayload.send_url = monitor.sendUrl;
+
+                let groupBean;
+                if (group.id) {
+                    groupBean = await Group.query()
+                        .where({ id: group.id, public: true, status_page_id: statusPage.id })
+                        .first();
                 }
-                if (monitor.url !== undefined) {
-                    relationPayload.custom_url = monitor.url;
+
+                if (groupBean) {
+                    groupBean = await groupBean.$query().patchAndFetch(payload);
+                } else {
+                    groupBean = await Group.query().insertAndFetch(payload);
                 }
-                await knex("monitor_group").insert(relationPayload);
+
+                await knex("monitor_group").where("group_id", groupBean.id).delete();
+
+                let monitorOrder = 1;
+
+                for (let monitor of group.monitorList) {
+                    const relationPayload = {
+                        weight: monitorOrder++,
+                        group_id: groupBean.id,
+                        monitor_id: monitor.id,
+                    };
+                    if (monitor.sendUrl !== undefined) {
+                        relationPayload.send_url = monitor.sendUrl;
+                    }
+                    if (monitor.url !== undefined) {
+                        relationPayload.custom_url = monitor.url;
+                    }
+                    await knex("monitor_group").insert(relationPayload);
+                }
+
+                groupIDList.push(groupBean.id);
+                group.id = groupBean.id;
             }
 
-            groupIDList.push(groupBean.id);
-            group.id = groupBean.id;
-        }
+            // Delete groups that are not in the list
+            log.debug("socket", "Delete groups that are not in the list");
+            if (groupIDList.length === 0) {
+                await knex("group").where("status_page_id", statusPage.id).delete();
+            } else {
+                await knex("group").where("status_page_id", statusPage.id).whereNotIn("id", groupIDList).delete();
+            }
 
-        // Delete groups that are not in the list
-        log.debug("socket", "Delete groups that are not in the list");
-        if (groupIDList.length === 0) {
-            await knex("group").where("status_page_id", statusPage.id).delete();
-        } else {
-            await knex("group")
-                .where("status_page_id", statusPage.id)
-                .whereNotIn("id", groupIDList)
-                .delete();
-        }
+            const server = UptimeKumaServer.getInstance();
 
-        const server = UptimeKumaServer.getInstance();
-
-        // Also change entry page to new slug if it is the default one, and slug is changed.
-        if (server.entryPage === "statusPage-" + slug && statusPage.slug !== slug) {
-            server.entryPage = "statusPage-" + statusPage.slug;
-            await Settings.set("entryPage", server.entryPage, "general");
-        }
-
-        apicache.clear();
-
-        callback({
-            ok: true,
-            publicGroupList,
-        });
-    }, { fallbackMsg: "Failed to save status page" });
-
-    // Add a new status page
-    onAuthed(socket, "addStatusPage", async (socket, title, slug, callback) => {
-        title = title?.trim();
-        slug = slug?.trim();
-
-        // Check empty
-        if (!title || !slug) {
-            throw new UserFacingError("Please input all fields");
-        }
-
-        // Make sure slug is string
-        if (typeof slug !== "string") {
-            throw new UserFacingError("Slug -Accept string only");
-        }
-
-        // lower case only
-        slug = slug.toLowerCase();
-
-        checkSlug(slug);
-
-        await StatusPage.query().insert({
-            slug,
-            title,
-            theme: "auto",
-            icon: "",
-            auto_refresh_interval: 300,
-        });
-
-        callback({
-            ok: true,
-            msg: "successAdded",
-            msgi18n: true,
-            slug: slug,
-        });
-    }, { fallbackMsg: "Failed to add status page" });
-
-    // Delete a status page
-    onAuthed(socket, "deleteStatusPage", async (socket, slug, callback) => {
-        const server = UptimeKumaServer.getInstance();
-
-        let statusPageID = await StatusPage.slugToID(slug);
-
-        if (statusPageID) {
-            // Reset entry page if it is the default one.
-            if (server.entryPage === "statusPage-" + slug) {
-                server.entryPage = "dashboard";
+            // Also change entry page to new slug if it is the default one, and slug is changed.
+            if (server.entryPage === "statusPage-" + slug && statusPage.slug !== slug) {
+                server.entryPage = "statusPage-" + statusPage.slug;
                 await Settings.set("entryPage", server.entryPage, "general");
             }
 
-            // No need to delete records from `status_page_cname`, because it has cascade foreign key.
-            // But for incident & group, it is hard to add cascade foreign key during migration, so they have to be deleted manually.
-
-            const knex = getKnex();
-            // Delete incident
-            await knex("incident").where("status_page_id", statusPageID).delete();
-            // Delete group
-            await knex("group").where("status_page_id", statusPageID).delete();
-            // Delete status_page
-            await knex("status_page").where("id", statusPageID).delete();
-
             apicache.clear();
-        } else {
-            throw new UserFacingError("Status Page is not found");
-        }
 
-        callback({
-            ok: true,
-        });
-    }, { fallbackMsg: "Failed to delete status page" });
+            callback({
+                ok: true,
+                publicGroupList,
+            });
+        },
+        { fallbackMsg: "Failed to save status page" }
+    );
+
+    // Add a new status page
+    onAuthed(
+        socket,
+        "addStatusPage",
+        async (socket, title, slug, callback) => {
+            title = title?.trim();
+            slug = slug?.trim();
+
+            // Check empty
+            if (!title || !slug) {
+                throw new UserFacingError("Please input all fields");
+            }
+
+            // Make sure slug is string
+            if (typeof slug !== "string") {
+                throw new UserFacingError("Slug -Accept string only");
+            }
+
+            // lower case only
+            slug = slug.toLowerCase();
+
+            checkSlug(slug);
+
+            await StatusPage.query().insert({
+                slug,
+                title,
+                theme: "auto",
+                icon: "",
+                auto_refresh_interval: 300,
+            });
+
+            callback({
+                ok: true,
+                msg: "successAdded",
+                msgi18n: true,
+                slug: slug,
+            });
+        },
+        { fallbackMsg: "Failed to add status page" }
+    );
+
+    // Delete a status page
+    onAuthed(
+        socket,
+        "deleteStatusPage",
+        async (socket, slug, callback) => {
+            const server = UptimeKumaServer.getInstance();
+
+            let statusPageID = await StatusPage.slugToID(slug);
+
+            if (statusPageID) {
+                // Reset entry page if it is the default one.
+                if (server.entryPage === "statusPage-" + slug) {
+                    server.entryPage = "dashboard";
+                    await Settings.set("entryPage", server.entryPage, "general");
+                }
+
+                // No need to delete records from `status_page_cname`, because it has cascade foreign key.
+                // But for incident & group, it is hard to add cascade foreign key during migration, so they have to be deleted manually.
+
+                const knex = getKnex();
+                // Delete incident
+                await knex("incident").where("status_page_id", statusPageID).delete();
+                // Delete group
+                await knex("group").where("status_page_id", statusPageID).delete();
+                // Delete status_page
+                await knex("status_page").where("id", statusPageID).delete();
+
+                apicache.clear();
+            } else {
+                throw new UserFacingError("Status Page is not found");
+            }
+
+            callback({
+                ok: true,
+            });
+        },
+        { fallbackMsg: "Failed to delete status page" }
+    );
 };
 
 /**

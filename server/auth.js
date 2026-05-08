@@ -23,9 +23,11 @@ exports.login = async function (username, password) {
     if (user && passwordHash.verify(password, user.password)) {
         // Upgrade the hash to bcrypt
         if (passwordHash.needRehash(user.password)) {
-            await getKnex()("user").where("id", user.id).update({
-                password: await passwordHash.generate(password),
-            });
+            await getKnex()("user")
+                .where("id", user.id)
+                .update({
+                    password: await passwordHash.generate(password),
+                });
         }
         return user;
     }

@@ -275,10 +275,7 @@ class StatusPage extends BaseModel {
         // Public Group List
         const showTags = !!statusPage.show_tags;
 
-        const list = await Group.query()
-            .where({ public: true,
-                status_page_id: statusPage.id })
-            .orderBy("weight");
+        const list = await Group.query().where({ public: true, status_page_id: statusPage.id }).orderBy("weight");
 
         let heartbeats = [];
 
@@ -322,9 +319,7 @@ class StatusPage extends BaseModel {
 
         // All active incidents
         let incidents = await Incident.query()
-            .where({ pin: true,
-                active: true,
-                status_page_id: statusPage.id })
+            .where({ pin: true, active: true, status_page_id: statusPage.id })
             .orderBy("created_date", "desc");
         incidents = incidents.map((i) => i.toPublicJSON());
 
@@ -334,10 +329,7 @@ class StatusPage extends BaseModel {
         const publicGroupList = [];
         const showTags = !!statusPage.show_tags;
 
-        const list = await Group.query()
-            .where({ public: true,
-                status_page_id: statusPage.id })
-            .orderBy("weight");
+        const list = await Group.query().where({ public: true, status_page_id: statusPage.id }).orderBy("weight");
 
         for (let groupBean of list) {
             let monitorGroup = await groupBean.toPublicJSON(showTags, config?.showCertificateExpiry);

@@ -39,8 +39,7 @@ class SqliteDialect extends Dialect {
         // "SQLITE_BUSY: database is locked" errors.
         if (process.env.UPTIME_KUMA_SQLITE_SINGLE_CONNECTION !== "false") {
             log.info("db", "Using single connection for SQLite");
-            poolConfig = { min: 1,
-                max: 1 };
+            poolConfig = { min: 1, max: 1 };
         }
 
         return {
@@ -153,9 +152,8 @@ class SqliteDialect extends Dialect {
      * @returns {Promise<void>}
      */
     async #initConnection(rawConn, testMode) {
-        const asyncRun = (sql) => new Promise((resolve, reject) =>
-            rawConn.run(sql, (err) => (err ? reject(err) : resolve()))
-        );
+        const asyncRun = (sql) =>
+            new Promise((resolve, reject) => rawConn.run(sql, (err) => (err ? reject(err) : resolve())));
 
         if (testMode) {
             await asyncRun("PRAGMA journal_mode = MEMORY");

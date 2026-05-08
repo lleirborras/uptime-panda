@@ -364,12 +364,20 @@ class UptimeCalculator {
             log.debug("uptime_calc", "Remove old data");
             await knex("stat_minutely")
                 .where("monitor_id", this.monitorID)
-                .andWhere("timestamp", "<", this.getMinutelyKey(currentDate.subtract(this.statMinutelyKeepHour, "hour"), false))
+                .andWhere(
+                    "timestamp",
+                    "<",
+                    this.getMinutelyKey(currentDate.subtract(this.statMinutelyKeepHour, "hour"), false)
+                )
                 .delete();
 
             await knex("stat_hourly")
                 .where("monitor_id", this.monitorID)
-                .andWhere("timestamp", "<", this.getHourlyKey(currentDate.subtract(this.statHourlyKeepDay, "day"), false))
+                .andWhere(
+                    "timestamp",
+                    "<",
+                    this.getHourlyKey(currentDate.subtract(this.statHourlyKeepDay, "day"), false)
+                )
                 .delete();
         }
 
@@ -406,14 +414,10 @@ class UptimeCalculator {
             return this.lastDailyStatBean;
         }
 
-        let row = await getKnex()("stat_daily")
-            .where({ monitor_id: this.monitorID,
-                timestamp })
-            .first();
+        let row = await getKnex()("stat_daily").where({ monitor_id: this.monitorID, timestamp }).first();
 
         if (!row) {
-            row = { monitor_id: this.monitorID,
-                timestamp };
+            row = { monitor_id: this.monitorID, timestamp };
         }
 
         this.lastDailyStatBean = row;
@@ -430,14 +434,10 @@ class UptimeCalculator {
             return this.lastHourlyStatBean;
         }
 
-        let row = await getKnex()("stat_hourly")
-            .where({ monitor_id: this.monitorID,
-                timestamp })
-            .first();
+        let row = await getKnex()("stat_hourly").where({ monitor_id: this.monitorID, timestamp }).first();
 
         if (!row) {
-            row = { monitor_id: this.monitorID,
-                timestamp };
+            row = { monitor_id: this.monitorID, timestamp };
         }
 
         this.lastHourlyStatBean = row;
@@ -454,14 +454,10 @@ class UptimeCalculator {
             return this.lastMinutelyStatBean;
         }
 
-        let row = await getKnex()("stat_minutely")
-            .where({ monitor_id: this.monitorID,
-                timestamp })
-            .first();
+        let row = await getKnex()("stat_minutely").where({ monitor_id: this.monitorID, timestamp }).first();
 
         if (!row) {
-            row = { monitor_id: this.monitorID,
-                timestamp };
+            row = { monitor_id: this.monitorID, timestamp };
         }
 
         this.lastMinutelyStatBean = row;

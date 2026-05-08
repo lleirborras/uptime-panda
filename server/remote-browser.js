@@ -9,8 +9,7 @@ class RemoteBrowser {
      * @returns {Promise<import("./model/remote_browser")>} Remote Browser
      */
     static async get(remoteBrowserID, userID) {
-        const bean = await RemoteBrowserModel.query().where({ id: remoteBrowserID,
-            user_id: userID }).first();
+        const bean = await RemoteBrowserModel.query().where({ id: remoteBrowserID, user_id: userID }).first();
 
         if (!bean) {
             throw new Error("Remote browser not found");
@@ -34,8 +33,7 @@ class RemoteBrowser {
         };
 
         if (remoteBrowserID) {
-            const existing = await RemoteBrowserModel.query().where({ id: remoteBrowserID,
-                user_id: userID }).first();
+            const existing = await RemoteBrowserModel.query().where({ id: remoteBrowserID, user_id: userID }).first();
             if (!existing) {
                 throw new Error("Remote browser not found");
             }
@@ -52,8 +50,7 @@ class RemoteBrowser {
      */
     static async delete(remoteBrowserID, userID) {
         const knex = getKnex();
-        const existing = await knex("remote_browser").where({ id: remoteBrowserID,
-            user_id: userID }).first();
+        const existing = await knex("remote_browser").where({ id: remoteBrowserID, user_id: userID }).first();
 
         if (!existing) {
             throw new Error("Remote Browser not found");

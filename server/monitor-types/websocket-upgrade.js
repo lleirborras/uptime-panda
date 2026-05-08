@@ -119,7 +119,9 @@ class WebSocketMonitorType extends MonitorType {
 
         return new Promise((resolve) => {
             // If user inputs subprotocol(s), convert to array, set Sec-WebSocket-Protocol header, timeout in ms. Subprotocol Identifier column: https://www.iana.org/assignments/websocket/websocket.xml#subprotocol-name
-            const subprotocol = monitor.ws_subprotocol ? monitor.ws_subprotocol.replace(/\s/g, "").split(",") : undefined;
+            const subprotocol = monitor.ws_subprotocol
+                ? monitor.ws_subprotocol.replace(/\s/g, "").split(",")
+                : undefined;
             const ws = new WebSocket(monitor.url, subprotocol, authOptions);
 
             ws.addEventListener("open", (event) => {

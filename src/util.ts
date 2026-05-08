@@ -365,8 +365,8 @@ class Logger {
 
         // Write to console
         const prefix: unknown[] = ctxPart
-            ? [ timePart, ctxPart, modulePart, levelPart ]
-            : [ timePart, modulePart, levelPart ];
+            ? [timePart, ctxPart, modulePart, levelPart]
+            : [timePart, modulePart, levelPart];
         switch (level) {
             case "ERROR":
                 console.error(...prefix, ...msg);

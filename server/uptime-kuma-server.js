@@ -284,10 +284,7 @@ class UptimeKumaServer {
             queryParams.push(monitorID);
         }
 
-        let monitorList = await Monitor.query()
-            .whereRaw(query, queryParams)
-            .orderBy("weight", "desc")
-            .orderBy("name");
+        let monitorList = await Monitor.query().whereRaw(query, queryParams).orderBy("weight", "desc").orderBy("name");
 
         const monitorData = monitorList.map((monitor) => ({
             id: monitor.id,
@@ -297,7 +294,9 @@ class UptimeKumaServer {
         const preloadData = await Monitor.preparePreloadData(monitorData);
 
         const result = {};
-        monitorList.forEach((monitor) => (result[monitor.id] = monitor.toJSON(preloadData)));
+        for (const monitor of monitorList) {
+            result[monitor.id] = monitor.toJSON(preloadData);
+        }
         return result;
     }
 
@@ -342,9 +341,7 @@ class UptimeKumaServer {
     async loadMaintenanceList(userID) {
         const Maintenance = require("./model/maintenance");
         const maintenanceCache = require("./maintenance-cache");
-        let maintenanceList = await Maintenance.query()
-            .orderBy("end_date", "desc")
-            .orderBy("title");
+        let maintenanceList = await Maintenance.query().orderBy("end_date", "desc").orderBy("title");
 
         for (let maintenance of maintenanceList) {
             this.maintenanceList[maintenance.id] = maintenance;

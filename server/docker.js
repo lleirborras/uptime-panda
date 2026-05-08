@@ -28,8 +28,7 @@ class DockerHost {
         };
 
         if (dockerHostID) {
-            const existing = await DockerHostModel.query().where({ id: dockerHostID,
-                user_id: userID }).first();
+            const existing = await DockerHostModel.query().where({ id: dockerHostID, user_id: userID }).first();
             if (!existing) {
                 throw new Error("docker host not found");
             }
@@ -46,8 +45,7 @@ class DockerHost {
      */
     static async delete(dockerHostID, userID) {
         const knex = getKnex();
-        const existing = await knex("docker_host").where({ id: dockerHostID,
-            user_id: userID }).first();
+        const existing = await knex("docker_host").where({ id: dockerHostID, user_id: userID }).first();
         if (!existing) {
             throw new Error("docker host not found");
         }

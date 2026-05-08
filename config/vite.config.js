@@ -36,7 +36,7 @@ export default defineConfig({
         preprocessorOptions: {
             scss: {
                 // Allow bare module imports e.g. @import "pkg/dist/file"
-                loadPaths: [ path.resolve(__dirname, "..", "node_modules") ],
+                loadPaths: [path.resolve(__dirname, "..", "node_modules")],
             },
         },
         postcss: {

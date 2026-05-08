@@ -15,7 +15,9 @@
             "**/*.css",
             "**/*.scss",
             "!**/*.vue",
-            "!src/lang/*.json"
+            "!src/lang/*.json",
+            "!server/modules/**",
+            "!src/util.js"
         ]
     },
     "formatter": {
@@ -62,7 +64,13 @@
             },
             "suspicious": {
                 "noDoubleEquals": "warn",
-                "noVar": "error"
+                "noVar": "error",
+                "noControlCharactersInRegex": "off",
+                "noAssignInExpressions": "off",
+                "noImplicitAnyLet": "off"
+            },
+            "correctness": {
+                "noUnusedVariables": "warn"
             }
         }
     }

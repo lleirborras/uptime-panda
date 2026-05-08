@@ -52,6 +52,7 @@ const Heartbeat = require("./heartbeat");
 const ProxyModel = require("./proxy");
 const DockerHostModel = require("./docker_host");
 const { Notification } = require("../notification");
+// biome-ignore lint/suspicious/noShadowRestrictedNames: class name predates JS Proxy global; rename is a larger refactor
 const { Proxy } = require("../proxy");
 const { demoMode } = require("../config");
 const version = require("../../package.json").version;
@@ -269,7 +270,11 @@ class Monitor extends BaseModel {
                 tlsCa: this.tls_ca,
                 tlsCert: this.tls_cert,
                 tlsKey: this.tls_key,
-                kafkaProducerSaslOptions: safeJsonParse(this.kafka_producer_sasl_options, null, "kafka_producer_sasl_options"),
+                kafkaProducerSaslOptions: safeJsonParse(
+                    this.kafka_producer_sasl_options,
+                    null,
+                    "kafka_producer_sasl_options"
+                ),
                 rabbitmqUsername: this.rabbitmq_username,
                 rabbitmqPassword: this.rabbitmq_password,
             };
@@ -390,7 +395,11 @@ class Monitor extends BaseModel {
      */
     getAcceptedStatuscodes() {
         if (this._acceptedStatuscodes === undefined) {
-            this._acceptedStatuscodes = safeJsonParse(this.accepted_statuscodes_json, [ "200" ], "accepted_statuscodes_json");
+            this._acceptedStatuscodes = safeJsonParse(
+                this.accepted_statuscodes_json,
+                ["200"],
+                "accepted_statuscodes_json"
+            );
         }
         return this._acceptedStatuscodes;
     }
@@ -1381,8 +1390,7 @@ class Monitor extends BaseModel {
                 if (oldCertInfo.certInfo.fingerprint256 !== checkCertificateResult.certInfo.fingerprint256) {
                     log.debug("monitor", "Resetting sent_history");
                     await knex("notification_sent_history")
-                        .where({ type: "certificate",
-                            monitor_id: this.id })
+                        .where({ type: "certificate", monitor_id: this.id })
                         .delete();
                 } else {
                     // Cert unchanged — skip the redundant write.
@@ -1598,9 +1606,7 @@ class Monitor extends BaseModel {
                     // Filter by important = 1 to get the state transition heartbeat (e.g. UP→DOWN),
                     // not the most recent DOWN heartbeat which would be the last check before recovery.
                     const lastDownHeartbeat = await getKnex()("heartbeat")
-                        .where({ monitor_id: monitor.id,
-                            status: DOWN,
-                            important: true })
+                        .where({ monitor_id: monitor.id, status: DOWN, important: true })
                         .orderBy("time", "desc")
                         .first("time");
 
@@ -1657,8 +1663,7 @@ class Monitor extends BaseModel {
      */
     async sendCertNotificationByTargetDays(certCN, certType, daysRemaining, targetDays, notificationList) {
         let row = await getKnex()("notification_sent_history")
-            .where({ type: "certificate",
-                monitor_id: this.id })
+            .where({ type: "certificate", monitor_id: this.id })
             .andWhere("days", "<=", targetDays)
             .first();
 
@@ -1700,10 +1705,7 @@ class Monitor extends BaseModel {
      * @returns {Promise<LooseObject<any>>} Previous heartbeat
      */
     static async getPreviousHeartbeat(monitorID) {
-        return Heartbeat.query()
-            .where("monitor_id", monitorID)
-            .orderBy("id", "desc")
-            .first();
+        return Heartbeat.query().where("monitor_id", monitorID).orderBy("id", "desc").first();
     }
 
     /**
@@ -1718,9 +1720,7 @@ class Monitor extends BaseModel {
      * @returns {Promise<boolean>} Is the monitor under maintenance
      */
     static async isUnderMaintenance(monitorID) {
-        const rows = await getKnex()("monitor_maintenance")
-            .where("monitor_id", monitorID)
-            .pluck("maintenance_id");
+        const rows = await getKnex()("monitor_maintenance").where("monitor_id", monitorID).pluck("maintenance_id");
 
         for (const maintenanceID of rows) {
             const maintenance = await UptimeKumaServer.getInstance().getMaintenance(maintenanceID);
@@ -1827,7 +1827,10 @@ class Monitor extends BaseModel {
 
         if (this.type === "ping") {
             // ping parameters validation
-            if (this.packet_size && (this.packet_size < PING_PACKET_SIZE_MIN || this.packet_size > PING_PACKET_SIZE_MAX)) {
+            if (
+                this.packet_size &&
+                (this.packet_size < PING_PACKET_SIZE_MIN || this.packet_size > PING_PACKET_SIZE_MAX)
+            ) {
                 throw new Error(
                     `Packet size must be between ${PING_PACKET_SIZE_MIN} and ${PING_PACKET_SIZE_MAX} (default: ${PING_PACKET_SIZE_DEFAULT})`
                 );
@@ -1959,12 +1962,10 @@ class Monitor extends BaseModel {
                 childrenByParent.get(row.parent).push(row.id);
             }
 
-            const childrenIDs = monitorData.map((monitor) =>
-                Monitor.collectChildrenIDs(monitor.id, childrenByParent)
-            );
+            const childrenIDs = monitorData.map((monitor) => Monitor.collectChildrenIDs(monitor.id, childrenByParent));
             // isParentActiveFromMap walks the in-memory map — no DB round-trips.
-            const activeStatuses = monitorData.map((monitor) =>
-                Boolean(monitor.active) && Monitor.isParentActiveFromMap(monitor.id, monitorsByID)
+            const activeStatuses = monitorData.map(
+                (monitor) => Boolean(monitor.active) && Monitor.isParentActiveFromMap(monitor.id, monitorsByID)
             );
             const forceInactiveStatuses = monitorData.map((monitor) =>
                 Monitor.isParentActiveFromMap(monitor.id, monitorsByID)
@@ -2184,8 +2185,7 @@ class Monitor extends BaseModel {
 
         // Delete from database
         const db = trx || getKnex();
-        await db("monitor").where({ id: monitorID,
-            user_id: userID }).delete();
+        await db("monitor").where({ id: monitorID, user_id: userID }).delete();
     }
 
     /**
@@ -2201,8 +2201,7 @@ class Monitor extends BaseModel {
     static async deleteMonitorRecursively(monitorID, userID, trx) {
         // Check if this monitor is a group
         const lookup = trx ? Monitor.query(trx) : Monitor.query();
-        const monitor = await lookup.where({ id: monitorID,
-            user_id: userID }).first();
+        const monitor = await lookup.where({ id: monitorID, user_id: userID }).first();
 
         if (monitor && monitor.type === "group") {
             // Get all children and delete them recursively

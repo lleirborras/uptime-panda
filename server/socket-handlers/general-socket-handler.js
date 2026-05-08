@@ -42,71 +42,94 @@ function getGameList() {
  * @returns {void}
  */
 module.exports.generalSocketHandler = (socket, server) => {
-    onAuthed(socket, "initServerTimezone", async (socket, timezone) => {
-        log.debug("generalSocketHandler", "Timezone: " + timezone);
-        await Settings.set("initServerTimezone", true);
-        await server.setTimezone(timezone);
-        await sendInfo(socket);
-    }, { logNamespace: "initServerTimezone",
-        fallbackMsg: "Failed to set timezone" });
+    onAuthed(
+        socket,
+        "initServerTimezone",
+        async (socket, timezone) => {
+            log.debug("generalSocketHandler", "Timezone: " + timezone);
+            await Settings.set("initServerTimezone", true);
+            await server.setTimezone(timezone);
+            await sendInfo(socket);
+        },
+        { logNamespace: "initServerTimezone", fallbackMsg: "Failed to set timezone" }
+    );
 
-    onAuthed(socket, "getGameList", async (socket, callback) => {
-        callback({
-            ok: true,
-            gameList: getGameList(),
-        });
-    }, { fallbackMsg: "Failed to retrieve game list" });
-
-    onAuthed(socket, "testChrome", (socket, executable, callback) => {
-        // Just noticed that await call could block the whole socket.io server!!! Use pure promise instead.
-        testChrome(executable)
-            .then((version) => {
-                callback({
-                    ok: true,
-                    msg: {
-                        key: "foundChromiumVersion",
-                        values: [version],
-                    },
-                    msgi18n: true,
-                });
-            })
-            .catch((e) => {
-                callback({
-                    ok: false,
-                    msg: e.message,
-                });
+    onAuthed(
+        socket,
+        "getGameList",
+        async (socket, callback) => {
+            callback({
+                ok: true,
+                gameList: getGameList(),
             });
-    }, { fallbackMsg: "Failed to test Chrome" });
+        },
+        { fallbackMsg: "Failed to retrieve game list" }
+    );
 
-    onAuthed(socket, "getPushExample", async (socket, language, callback) => {
-        if (!/^[a-z-]+$/.test(language)) {
-            throw new UserFacingError("Invalid language");
-        }
-
-        try {
-            let dir = path.join("./extra/push-examples", language);
-            let files = await fsAsync.readdir(dir);
-
-            for (let file of files) {
-                if (file.startsWith("index.")) {
+    onAuthed(
+        socket,
+        "testChrome",
+        (socket, executable, callback) => {
+            // Just noticed that await call could block the whole socket.io server!!! Use pure promise instead.
+            testChrome(executable)
+                .then((version) => {
                     callback({
                         ok: true,
-                        code: await fsAsync.readFile(path.join(dir, file), "utf8"),
+                        msg: {
+                            key: "foundChromiumVersion",
+                            values: [version],
+                        },
+                        msgi18n: true,
                     });
-                    return;
-                }
-            }
-        } catch (e) {}
+                })
+                .catch((e) => {
+                    callback({
+                        ok: false,
+                        msg: e.message,
+                    });
+                });
+        },
+        { fallbackMsg: "Failed to test Chrome" }
+    );
 
-        callback({
-            ok: false,
-            msg: "Not found",
-        });
-    }, { fallbackMsg: "Failed to get push example" });
+    onAuthed(
+        socket,
+        "getPushExample",
+        async (socket, language, callback) => {
+            if (!/^[a-z-]+$/.test(language)) {
+                throw new UserFacingError("Invalid language");
+            }
+
+            try {
+                let dir = path.join("./extra/push-examples", language);
+                let files = await fsAsync.readdir(dir);
+
+                for (let file of files) {
+                    if (file.startsWith("index.")) {
+                        callback({
+                            ok: true,
+                            code: await fsAsync.readFile(path.join(dir, file), "utf8"),
+                        });
+                        return;
+                    }
+                }
+            } catch (e) {}
+
+            callback({
+                ok: false,
+                msg: "Not found",
+            });
+        },
+        { fallbackMsg: "Failed to get push example" }
+    );
 
     // Disconnect all other socket clients of the user
-    onAuthed(socket, "disconnectOtherSocketClients", async (socket) => {
-        server.disconnectAllSocketClients(socket.userID, socket.id);
-    }, { logNamespace: "disconnectAllSocketClients",
-        fallbackMsg: "Failed to disconnect other socket clients" });
+    onAuthed(
+        socket,
+        "disconnectOtherSocketClients",
+        async (socket) => {
+            server.disconnectAllSocketClients(socket.userID, socket.id);
+        },
+        { logNamespace: "disconnectAllSocketClients", fallbackMsg: "Failed to disconnect other socket clients" }
+    );
 };

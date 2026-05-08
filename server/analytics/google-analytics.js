@@ -1,5 +1,5 @@
 const jsesc = require("jsesc");
-const { escape } = require("html-escaper");
+const { escape: htmlEscape } = require("html-escaper");
 
 /**
  * Returns a string that represents the javascript that is required to insert the Google Analytics scripts
@@ -15,7 +15,7 @@ function getGoogleAnalyticsScript(tagId) {
     }
 
     // Escape the tag ID for use in an HTML attribute.
-    let escapedTagIdHTMLAttribute = escape(tagId);
+    let escapedTagIdHTMLAttribute = htmlEscape(tagId);
 
     return `
         <script async src="https://www.googletagmanager.com/gtag/js?id=${escapedTagIdHTMLAttribute}"></script>

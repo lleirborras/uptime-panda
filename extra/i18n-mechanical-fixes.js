@@ -100,8 +100,16 @@ const RENAME_FIXES = [
     // fr-FR
     { locale: "fr-FR", key: "Mention group", renames: { "{groupe}": "{group}" } },
     { locale: "fr-FR", key: "systemServiceCommandHint", renames: { "{commande}": "{command}" } },
-    { locale: "fr-FR", key: "You can divide numbers with commas or semicolons", renames: { "{virgule}": "{comma}", "{point-virgule}": "{semicolon}" } },
-    { locale: "fr-FR", key: "aliyun-template-requirements-and-parameters", renames: { "{paramètres}": "{parameters}" } },
+    {
+        locale: "fr-FR",
+        key: "You can divide numbers with commas or semicolons",
+        renames: { "{virgule}": "{comma}", "{point-virgule}": "{semicolon}" },
+    },
+    {
+        locale: "fr-FR",
+        key: "aliyun-template-requirements-and-parameters",
+        renames: { "{paramètres}": "{parameters}" },
+    },
 
     // hr-HR
     { locale: "hr-HR", key: "wayToGetClickSMSIRTemplateID", renames: { "{ovdje}": "{here}" } },
@@ -124,7 +132,11 @@ const RENAME_FIXES = [
     // nl-NL
     { locale: "nl-NL", key: "rabbitmqHelpText", renames: { "{rabitmq_documentatie}": "{rabitmq_documentation}" } },
     { locale: "nl-NL", key: "mqttHostnameTip", renames: { "{hostnaamFormat}": "{hostnameFormat}" } },
-    { locale: "nl-NL", key: "Either enter the hostname of the server you want to connect to or localhost if you intend to use a locally configured mail transfer agent", renames: { "{local-mta}": "{local_mta}" } },
+    {
+        locale: "nl-NL",
+        key: "Either enter the hostname of the server you want to connect to or localhost if you intend to use a locally configured mail transfer agent",
+        renames: { "{local-mta}": "{local_mta}" },
+    },
 
     // pl
     { locale: "pl", key: "wayToGetHeiiOnCallDetails", renames: { "{dokumentacji}": "{documentation}" } },
@@ -169,7 +181,11 @@ const RENAME_FIXES = [
     // vls
     { locale: "vls", key: "mqttHostnameTip", renames: { "{hostnaamFormat}": "{hostnameFormat}" } },
     { locale: "vls", key: "rabbitmqHelpText", renames: { "{rabitmq_documentatie}": "{rabitmq_documentation}" } },
-    { locale: "vls", key: "Either enter the hostname of the server you want to connect to or localhost if you intend to use a locally configured mail transfer agent", renames: { "{local-mta}": "{local_mta}" } },
+    {
+        locale: "vls",
+        key: "Either enter the hostname of the server you want to connect to or localhost if you intend to use a locally configured mail transfer agent",
+        renames: { "{local-mta}": "{local_mta}" },
+    },
 ];
 
 /**
@@ -179,8 +195,25 @@ const RENAME_FIXES = [
  * DELETE_KEYS below).
  */
 const CLICKSEND_REWRITE_LOCALES = [
-    "ar", "ar-SY", "be", "bn", "da-DK", "el-GR", "eu", "fa", "fi", "he-IL",
-    "ja", "ko-KR", "lt", "nl-NL", "pl", "ro", "th-TH", "vls", "zh-HK",
+    "ar",
+    "ar-SY",
+    "be",
+    "bn",
+    "da-DK",
+    "el-GR",
+    "eu",
+    "fa",
+    "fi",
+    "he-IL",
+    "ja",
+    "ko-KR",
+    "lt",
+    "nl-NL",
+    "pl",
+    "ro",
+    "th-TH",
+    "vls",
+    "zh-HK",
 ];
 
 /**
@@ -189,12 +222,16 @@ const CLICKSEND_REWRITE_LOCALES = [
  * but keep the inner word intact: `{Hostname}` → `Hostname`.
  */
 const STRIP_BRACES = [
-    { locale: "be", key: "wayToGetPagerTreeIntegrationURL", tokens: [ "{Endpoint}" ] },
-    { locale: "be", key: "callMeBotGet", tokens: [ "{endpoint}" ] },
-    { locale: "be", key: "cellsyntOriginator", tokens: [ "{originatortype}" ] },
-    { locale: "be", key: "Either enter the hostname of the server you want to connect to or localhost if you intend to use a locally configured mail transfer agent", tokens: [ "{Hostname}" ] },
-    { locale: "ru-RU", key: "callMeBotGet", tokens: [ "{endpoint}" ] },
-    { locale: "ru-RU", key: "cellsyntOriginator", tokens: [ "{originatortype}" ] },
+    { locale: "be", key: "wayToGetPagerTreeIntegrationURL", tokens: ["{Endpoint}"] },
+    { locale: "be", key: "callMeBotGet", tokens: ["{endpoint}"] },
+    { locale: "be", key: "cellsyntOriginator", tokens: ["{originatortype}"] },
+    {
+        locale: "be",
+        key: "Either enter the hostname of the server you want to connect to or localhost if you intend to use a locally configured mail transfer agent",
+        tokens: ["{Hostname}"],
+    },
+    { locale: "ru-RU", key: "callMeBotGet", tokens: ["{endpoint}"] },
+    { locale: "ru-RU", key: "cellsyntOriginator", tokens: ["{originatortype}"] },
 ];
 
 /**
@@ -203,8 +240,8 @@ const STRIP_BRACES = [
  * word to preserve).
  */
 const DROP_TOKENS = [
-    { locale: "yue", key: "wayToGetFlashDutyKey", tokens: [ "{0}" ] },
-    { locale: "zh-HK", key: "wayToGetFlashDutyKey", tokens: [ "{0}" ] },
+    { locale: "yue", key: "wayToGetFlashDutyKey", tokens: ["{0}"] },
+    { locale: "zh-HK", key: "wayToGetFlashDutyKey", tokens: ["{0}"] },
 ];
 
 /**
@@ -273,10 +310,10 @@ const DELETE_KEYS = [
  * normalises them all.
  */
 const ISSUE_TRACKER_VARIANTS = [
-    "{issuetackerURL}",   // the original typo (en + most locales)
-    "{issuetrackerURL}",  // nl-NL + vls already "corrected" to lowercase t
-    "{issuetakerURL}",    // ru-RU's misspelling
-    "{issustackerURL}",   // zh-TW's misspelling
+    "{issuetackerURL}", // the original typo (en + most locales)
+    "{issuetrackerURL}", // nl-NL + vls already "corrected" to lowercase t
+    "{issuetakerURL}", // ru-RU's misspelling
+    "{issustackerURL}", // zh-TW's misspelling
 ];
 const ISSUE_TRACKER_CORRECT = "{issueTrackerURL}";
 
@@ -315,7 +352,7 @@ function serialise(data) {
  */
 function applyRenames(value, renames) {
     let out = value;
-    for (const [ wrong, correct ] of Object.entries(renames)) {
+    for (const [wrong, correct] of Object.entries(renames)) {
         out = out.split(wrong).join(correct);
     }
     return out;
@@ -576,8 +613,9 @@ function fixVueCallSite() {
  */
 function main() {
     const idx = buildLocaleIndex();
-    const files = fs.readdirSync(LANG_DIR)
-        .filter(f => f.endsWith(".json") && f !== "en.json")
+    const files = fs
+        .readdirSync(LANG_DIR)
+        .filter((f) => f.endsWith(".json") && f !== "en.json")
         .sort();
 
     // Apply en.json's Category E first so the audit can be re-run cleanly.

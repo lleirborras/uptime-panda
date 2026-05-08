@@ -43,14 +43,9 @@ exports.initJWTSecret = async () => {
     const knex = getKnex();
     const newValue = await passwordHash.generate(genSecret());
 
-    await knex("setting")
-        .insert({ key: "jwtSecret",
-            value: newValue })
-        .onConflict("key")
-        .merge({ value: newValue });
+    await knex("setting").insert({ key: "jwtSecret", value: newValue }).onConflict("key").merge({ value: newValue });
 
-    return { key: "jwtSecret",
-        value: newValue };
+    return { key: "jwtSecret", value: newValue };
 };
 
 /**
@@ -658,8 +653,7 @@ exports.doubleCheckPassword = async (socket, currentPassword) => {
     }
 
     const User = require("./model/user");
-    let user = await User.query().where({ id: socket.userID,
-        active: true }).first();
+    let user = await User.query().where({ id: socket.userID, active: true }).first();
 
     if (!user || !passwordHash.verify(currentPassword, user.password)) {
         throw new Error("Incorrect current password");

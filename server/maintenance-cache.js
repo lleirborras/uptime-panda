@@ -62,7 +62,7 @@ class MaintenanceCache {
         this._loaded = true;
         log.debug(
             "maintenance-cache",
-            `Loaded ${mmRows.length} monitor_maintenance rows for ${monitorParent.size} monitors`,
+            `Loaded ${mmRows.length} monitor_maintenance rows for ${monitorParent.size} monitors`
         );
     }
 
@@ -153,7 +153,7 @@ class MaintenanceCache {
      * @returns {void}
      */
     removeMaintenance(maintenanceId) {
-        for (const [ monitorId, set ] of this._monitorMaintenances) {
+        for (const [monitorId, set] of this._monitorMaintenances) {
             if (set.delete(maintenanceId) && set.size === 0) {
                 this._monitorMaintenances.delete(monitorId);
             }

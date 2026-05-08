@@ -42,7 +42,8 @@ class Dialect {
      * @param {number} opts.poolMaxConnections Max connections cap from env
      * @throws {Error} When the subclass does not implement this method
      */
-    buildKnexConfig(opts) { // eslint-disable-line no-unused-vars
+    buildKnexConfig(opts) {
+        // eslint-disable-line no-unused-vars
         throw new Error(`${this.constructor.name}.buildKnexConfig() not implemented`);
     }
 
@@ -77,7 +78,8 @@ class Dialect {
      * @param {string} columnExpr Already-quoted column identifier (e.g. `"time"`)
      * @throws {Error} When the subclass does not implement this method
      */
-    sqlDateFromColumn(columnExpr) { // eslint-disable-line no-unused-vars
+    sqlDateFromColumn(columnExpr) {
+        // eslint-disable-line no-unused-vars
         throw new Error(`${this.constructor.name}.sqlDateFromColumn() not implemented`);
     }
     /* eslint-enable jsdoc/require-returns */
