@@ -29,11 +29,9 @@ If you don't need the PG/ORM-level changes and you're happy on upstream's releas
 
 ## 🥔 Live Demo
 
-Upstream's hosted demo (same UI):
+Try the live Uptime Panda instance:
 
-Demo Server (Location: Frankfurt - Germany): <https://demo.kuma.pet/start-demo>
-
-It is a temporary live demo, all data will be deleted after 10 minutes.
+**[https://uptime-panda.fly.dev/](https://uptime-panda.fly.dev/)**
 
 ## ⭐ Features
 
