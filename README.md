@@ -10,7 +10,11 @@ Uptime Panda is a self-hosted uptime monitoring tool — a fork of [Uptime Kuma]
 >
 > 🐻 **Where credit's due.** All the original work is by [@louislam](https://github.com/louislam) and the upstream Uptime Kuma contributors. Uptime Panda is a downstream fork — bug reports about features that exist upstream should go there too.
 
-<a target="_blank" href="https://github.com/lleirborras/uptime-panda"><img src="https://img.shields.io/github/stars/lleirborras/uptime-panda?style=flat" /></a> <a target="_blank" href="https://github.com/lleirborras/uptime-panda"><img src="https://img.shields.io/github/last-commit/lleirborras/uptime-panda" /></a>
+<a target="_blank" href="https://github.com/lleirborras/uptime-panda"><img src="https://img.shields.io/github/stars/lleirborras/uptime-panda?style=flat" /></a>
+<a target="_blank" href="https://github.com/lleirborras/uptime-panda"><img src="https://img.shields.io/github/last-commit/lleirborras/uptime-panda" /></a>
+<a target="_blank" href="https://github.com/lleirborras/uptime-panda/releases/latest"><img src="https://img.shields.io/github/v/release/lleirborras/uptime-panda" /></a>
+<a target="_blank" href="https://github.com/lleirborras/uptime-panda/actions/workflows/auto-test.yml"><img src="https://github.com/lleirborras/uptime-panda/actions/workflows/auto-test.yml/badge.svg" /></a>
+<a target="_blank" href="https://ghcr.io/lleirborras/uptime-panda"><img src="https://img.shields.io/badge/GHCR-ghcr.io%2Flleirborras%2Fuptime--panda-blue?logo=docker" /></a>
 
 <img src="https://user-images.githubusercontent.com/1336778/212262296-e6205815-ad62-488c-83ec-a5b0d0689f7c.jpg" width="700" alt="Uptime Panda Dashboard Screenshot" />
 
@@ -47,6 +51,26 @@ It is a temporary live demo, all data will be deleted after 10 minutes.
 - **Database backends:** SQLite (default), MariaDB/MySQL, PostgreSQL — see [`docs/DATABASE.md`](docs/DATABASE.md)
 
 ## 🔧 How to Install
+
+### 🐳 Docker — quick start
+
+Images are published to **GHCR** on every release for `linux/amd64`, `linux/arm64`, and `linux/arm/v7`:
+
+```bash
+# Latest release
+docker run -d -p 3001:3001 -v uptime-panda:/app/data \
+  --name uptime-panda ghcr.io/lleirborras/uptime-panda:latest
+
+# Rootless variant (runs as non-root node user)
+docker run -d -p 3001:3001 -v uptime-panda:/app/data \
+  --name uptime-panda ghcr.io/lleirborras/uptime-panda:latest-rootless
+
+# Pin to a specific release
+docker run -d -p 3001:3001 -v uptime-panda:/app/data \
+  --name uptime-panda ghcr.io/lleirborras/uptime-panda:2.3.3
+```
+
+See [`docs/CI_CD.md`](docs/CI_CD.md) for the full list of tags and the release pipeline.
 
 ### 🐳 Docker Compose
 
