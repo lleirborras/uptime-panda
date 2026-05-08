@@ -165,6 +165,7 @@
     "Password": "Password",
     "Remember me": "Remember me",
     "Login": "Log in",
+    "Login with SSO": "Login with SSO",
     "No Monitors, please": "No Monitors, please",
     "add one": "add one",
     "Notification Type": "Notification Type",
@@ -1534,5 +1535,13 @@
     "teltonikaModem": "Modem Id",
     "teltonikaModemHelptext": "The id of the SMS modem, must be in the format {0}. Refer to https://developers.teltonika-networks.com/reference/ for guidance.",
     "teltonikaPhoneNumber": "Phone number",
-    "teltonikaPhoneNumberHelptext": "The number must be in the international format {0}, {1}. Only one number is allowed."
+    "teltonikaPhoneNumberHelptext": "The number must be in the international format {0}, {1}. Only one number is allowed.",
+    "OIDC / SSO": "OIDC / SSO",
+    "OIDC Issuer URL": "OIDC Issuer URL",
+    "OIDC Client ID": "OIDC Client ID",
+    "OIDC Client Secret": "OIDC Client Secret",
+    "OIDC Scopes": "OIDC Scopes",
+    "OIDC Callback URL": "OIDC Callback URL",
+    "Enable OIDC": "Enable OIDC",
+    "Leave blank to keep current secret": "Leave blank to keep current secret"
 }

@@ -11,6 +11,7 @@ const RemoteBrowserModel = require("./model/remote_browser");
 const server = UptimeKumaServer.getInstance();
 const io = server.io;
 const { setting } = require("./util-server");
+const { Settings } = require("./settings");
 const checkVersion = require("./check-version");
 const Database = require("./database");
 
@@ -138,6 +139,7 @@ async function sendInfo(socket, hideVersion = false) {
         primaryBaseURL: await setting("primaryBaseURL"),
         serverTimezone: await server.getTimezone(),
         serverTimezoneOffset: server.getTimezoneOffset(),
+        oidcEnabled: !!(await Settings.get("oidcEnabled")),
     };
     if (!hideVersion) {
         info.version = checkVersion.version;

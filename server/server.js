@@ -395,6 +395,10 @@ let needSetup = false;
     const statusPageRouter = require("./routers/status-page-router");
     app.use(statusPageRouter);
 
+    // OIDC Router
+    const oidcRouter = require("./routers/oidc-router");
+    app.use(oidcRouter);
+
     // Universal Route Handler, must be at the end of all express routes.
     app.get("*", async (_request, response) => {
         if (_request.originalUrl.startsWith("/upload/")) {
@@ -1381,6 +1385,31 @@ let needSetup = false;
                 await server.sendMaintenanceList(socket);
             } catch (e) {
                 socketError(callback, e, "Failed to save settings");
+            }
+        });
+
+        socket.on("getOidcSettings", async (callback) => {
+            try {
+                checkLogin(socket);
+                const data = await Settings.getSettings("oidc");
+                delete data.oidcClientSecret;
+                callback({ ok: true, data });
+            } catch (e) {
+                callback({ ok: false, msg: e.message });
+            }
+        });
+
+        socket.on("setOidcSettings", async (data, callback) => {
+            try {
+                checkLogin(socket);
+                if (!data.oidcClientSecret) {
+                    data.oidcClientSecret = await Settings.get("oidcClientSecret");
+                }
+                await Settings.setSettings("oidc", data);
+                require("./routers/oidc-router").resetOidcClient();
+                callback({ ok: true });
+            } catch (e) {
+                callback({ ok: false, msg: e.message });
             }
         });
 
