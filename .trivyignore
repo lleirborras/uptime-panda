@@ -1,5 +1,0 @@
-# CVE-2026-33671 (picomatch ReDoS) — source is npm's own bundled tinyglobby
-# at /usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/
-# picomatch@4.0.3, shipped inside the node:24 base image. Not our code;
-# requires a Node.js/npm upstream release to fix.
-CVE-2026-33671
