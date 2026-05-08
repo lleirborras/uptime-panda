@@ -1,14 +1,18 @@
 /**
- * Prettier Configuration for Uptime Kuma
+ * Prettier Configuration for Uptime Panda
+ *
+ * NOTE: Prettier is now scoped to .vue files ONLY.
+ * All other file types (JS, TS, JSON, CSS, SCSS) are formatted by Biome.
+ * Biome does not have stable .vue support yet, so Prettier handles .vue formatting.
  *
  * Usage:
- *   npm run fmt              - Format all files (auto-runs in CI via autofix workflow)
- *   npm run fmt -- --check   - Check formatting without making changes
+ *   npm run fmt:vue              - Format .vue files (Prettier)
+ *   npm run fmt                  - Format all files (Biome for JS/TS/CSS/JSON + Prettier for .vue)
  *
- * TIP: This formatter is automatically run in CI, so no need to worry about it
+ * TIP: This formatter is automatically run in CI via the autofix workflow.
  */
 module.exports = {
-    // Core formatting options - matching original ESLint rules
+    // Core formatting options - must match Biome settings in biome.json
     semi: true,
     singleQuote: false,
     trailingComma: "es5",
@@ -23,7 +27,7 @@ module.exports = {
     // Vue-specific settings
     vueIndentScriptAndStyle: false,
     singleAttributePerLine: false,
-    htmlWhitespaceSensitivity: "ignore", // More forgiving with whitespace in HTML
+    htmlWhitespaceSensitivity: "ignore",
 
     // Override settings for specific file types
     overrides: [
@@ -31,34 +35,6 @@ module.exports = {
             files: "*.vue",
             options: {
                 parser: "vue",
-            },
-        },
-        {
-            files: ["*.json"],
-            options: {
-                tabWidth: 4,
-                trailingComma: "none",
-            },
-        },
-        {
-            files: ["*.yml", "*.yaml"],
-            options: {
-                tabWidth: 2,
-                trailingComma: "none",
-            },
-        },
-        {
-            files: ["src/icon.js"],
-            options: {
-                trailingComma: "all",
-            },
-        },
-        {
-            files: ["*.md"],
-            options: {
-                printWidth: 100,
-                proseWrap: "preserve",
-                tabWidth: 2,
             },
         },
     ],
