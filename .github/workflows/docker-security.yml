@@ -85,17 +85,30 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Scan image with Trivy
+      # Gate: fail the job if CRITICAL or HIGH fixable vulns exist
+      - name: Scan image with Trivy (exit-code gate)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: uptime-panda:scan
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          scanners: vuln
+
+      # Report: generate SARIF with all severities for GitHub Security tab
+      - name: Scan image with Trivy (SARIF report)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        if: always()
         with:
           image-ref: uptime-panda:scan
           format: sarif
           output: trivy-image.sarif
-          severity: CRITICAL,HIGH
-          exit-code: "1"
-          ignore-unfixed: true  # skip vulns with no upstream fix yet
+          exit-code: "0"
+          ignore-unfixed: true
           trivyignores: .trivyignore
-          scanners: vuln  # secret scanning handled by CodeQL + GitHub secret detection
+          scanners: vuln
 
       - name: Upload image scan results
         uses: github/codeql-action/upload-sarif@bc0b696b4103f5fe60f15749af68a046868d511a # codeql-bundle-v2.25.4
