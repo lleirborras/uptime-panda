@@ -1,4 +1,5 @@
-# picomatch@2.3.2 (CVE-2026-33671 ReDoS) is flagged because the lockfile
-# lists it, but it is marked "dev": true and is not installed in the
-# production image (npm ci --omit=dev excludes it).
+# CVE-2026-33671 (picomatch ReDoS) — source is npm's own bundled tinyglobby
+# at /usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/
+# picomatch@4.0.3, shipped inside the node:24 base image. Not our code;
+# requires a Node.js/npm upstream release to fix.
 CVE-2026-33671
