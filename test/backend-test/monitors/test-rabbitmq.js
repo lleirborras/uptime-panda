@@ -12,7 +12,8 @@ describe(
     () => {
         test("check() sets status to UP when RabbitMQ server is reachable", async () => {
             // The default timeout of 30 seconds might not be enough for the container to start
-            const rabbitMQContainer = await new RabbitMQContainer().withStartupTimeout(60000).start();
+            // testcontainers v11 removed the default image; pass it explicitly
+            const rabbitMQContainer = await new RabbitMQContainer("rabbitmq:3-management").withStartupTimeout(60000).start();
             const rabbitMQMonitor = new RabbitMqMonitorType();
             const connectionString = `http://${rabbitMQContainer.getHost()}:${rabbitMQContainer.getMappedPort(15672)}`;
 
@@ -58,7 +59,7 @@ describe(
         });
 
         test("checkSingleNode() succeeds when node is healthy", async () => {
-            const rabbitMQContainer = await new RabbitMQContainer().withStartupTimeout(60000).start();
+            const rabbitMQContainer = await new RabbitMQContainer("rabbitmq:3-management").withStartupTimeout(60000).start();
             const rabbitMQMonitor = new RabbitMqMonitorType();
             const connectionString = `http://${rabbitMQContainer.getHost()}:${rabbitMQContainer.getMappedPort(15672)}`;
 
