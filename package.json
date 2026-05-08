@@ -227,6 +227,13 @@
     },
     "overrides": {
         "tar": "~7.5.15",
-        "fast-xml-parser": "^5.7.3"
+        "fast-xml-parser": "^5.7.3",
+        "uuid": "^11.1.1",
+        "eslint": {
+            "rimraf": "^6.1.0"
+        },
+        "archiver-utils": {
+            "glob": "^13.0.0"
+        }
     }
 }
