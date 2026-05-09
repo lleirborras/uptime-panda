@@ -8,7 +8,7 @@ const { getKnex } = require("../db");
 const { UptimeKumaServer } = require("../uptime-kuma-server");
 const { log } = require("../../src/util");
 const { isSSL } = require("../config");
-const { loginRateLimiter } = require("../rate-limiter");
+const rateLimit = require("express-rate-limit");
 
 let _oidcClient = null;
 let _oidcConfigKey = null;
@@ -45,13 +45,12 @@ function resetOidcClient() {
 
 const router = express.Router();
 
-/** @type {import("express").RequestHandler} */
-const oidcRateLimiter = async (req, res, next) => {
-    if (!await loginRateLimiter.pass(null)) {
-        return res.status(429).send("Too many requests");
-    }
-    next();
-};
+const oidcRateLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
 router.get("/auth/oidc/start", oidcRateLimiter, async (req, res) => {
     try {
