@@ -1,6 +1,6 @@
 exports.up = function (knex) {
     return knex.schema.alterTable("user", function (table) {
-        table.text("oidc_sub").nullable().defaultTo(null);
+        table.string("oidc_sub", 255).nullable().defaultTo(null);
         table.unique(["oidc_sub"]);
     });
 };
