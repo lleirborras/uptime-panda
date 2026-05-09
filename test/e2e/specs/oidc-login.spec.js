@@ -14,7 +14,11 @@ const DEX_HOST_PORT = 5557;
 const DEX_CONTAINER_PORT = 5556;
 const APP_URL = "http://localhost:30001";
 
-// Build the Dex static config.  The bcrypt hash below is for "testpassword".
+/**
+ * Build the Dex static config. The bcrypt hash below is for "testpassword".
+ * @param {string} issuerUrl Full issuer URL including /dex path
+ * @returns {string} YAML config string for Dex
+ */
 function buildDexConfig(issuerUrl) {
     return `issuer: ${issuerUrl}
 storage:
@@ -71,9 +75,10 @@ test.beforeEach(async () => {
     await restoreSqliteSnapshot();
 });
 
-// ---------------------------------------------------------------------------
-// Helper: configure OIDC settings in the UI as admin, then log out.
-// ---------------------------------------------------------------------------
+/**
+ * Configure OIDC settings in the UI as admin, then log out.
+ * @param {import("@playwright/test").Page} page Playwright page object
+ */
 async function configureOidc(page) {
     await page.goto("./");
     await login(page);

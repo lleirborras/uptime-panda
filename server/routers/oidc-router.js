@@ -45,7 +45,7 @@ function resetOidcClient() {
 
 const router = express.Router();
 
-router.get("/auth/oidc/start", async (req, res) => {
+router.get("/auth/oidc/start", async (req, res) => { // CodeQL[js/missing-rate-limiting] - rate-limited via loginRateLimiter.pass()
     try {
         if (!await loginRateLimiter.pass(null)) {
             return res.status(429).send("Too many requests");
@@ -94,7 +94,7 @@ router.get("/auth/oidc/start", async (req, res) => {
     }
 });
 
-router.get("/auth/oidc/callback", async (req, res) => {
+router.get("/auth/oidc/callback", async (req, res) => { // CodeQL[js/missing-rate-limiting] - rate-limited via loginRateLimiter.pass()
     try {
         if (!await loginRateLimiter.pass(null)) {
             return res.redirect("/?oidcError=1");
