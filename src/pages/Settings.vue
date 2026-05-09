@@ -118,6 +118,9 @@ export default {
                 proxies: {
                     title: this.$t("Proxies"),
                 },
+                oidc: {
+                    title: this.$t("OIDC / SSO"),
+                },
                 about: {
                     title: this.$t("About"),
                 },

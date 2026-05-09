@@ -69,6 +69,13 @@
                 <div v-if="res && !res.ok" class="alert alert-danger mt-3" role="alert">
                     {{ $t(res.msg) }}
                 </div>
+
+                <template v-if="$root.info && $root.info.oidcEnabled">
+                    <hr />
+                    <a class="w-100 btn btn-outline-secondary" href="/auth/oidc/start">
+                        {{ $t("Login with SSO") }}
+                    </a>
+                </template>
             </form>
         </div>
     </div>

@@ -373,6 +373,10 @@ let needSetup = false;
     // With Basic Auth using the first user's username/password
     app.get("/metrics", apiAuth, prometheusAPIMetrics());
 
+    // OIDC Router — must be before static middleware so /auth/oidc/* routes are never intercepted by dist/
+    const oidcRouter = require("./routers/oidc-router");
+    app.use(oidcRouter);
+
     app.use(
         "/",
         expressStaticGzip("dist", {
@@ -1381,6 +1385,31 @@ let needSetup = false;
                 await server.sendMaintenanceList(socket);
             } catch (e) {
                 socketError(callback, e, "Failed to save settings");
+            }
+        });
+
+        socket.on("getOidcSettings", async (callback) => {
+            try {
+                checkLogin(socket);
+                const data = await Settings.getSettings("oidc");
+                delete data.oidcClientSecret;
+                callback({ ok: true, data });
+            } catch (e) {
+                callback({ ok: false, msg: e.message });
+            }
+        });
+
+        socket.on("setOidcSettings", async (data, callback) => {
+            try {
+                checkLogin(socket);
+                if (!data.oidcClientSecret) {
+                    data.oidcClientSecret = await Settings.get("oidcClientSecret");
+                }
+                await Settings.setSettings("oidc", data);
+                require("./routers/oidc-router").resetOidcClient();
+                callback({ ok: true });
+            } catch (e) {
+                callback({ ok: false, msg: e.message });
             }
         });
 

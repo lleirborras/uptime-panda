@@ -104,6 +104,19 @@ export default {
 
             this.socket.initedSocketIO = true;
 
+            // Consume OIDC callback token from URL
+            const _oidcParams = new URLSearchParams(location.search);
+            const _oidcToken = _oidcParams.get("token");
+            if (_oidcToken) {
+                this.storage().token = _oidcToken;
+                this.socket.token = _oidcToken;
+                history.replaceState({}, "", location.pathname);
+            }
+            if (_oidcParams.get("oidcError")) {
+                history.replaceState({}, "", location.pathname);
+                // Toast shown after socket connect via loginRequired error handling
+            }
+
             let protocol = location.protocol + "//";
 
             let url;
