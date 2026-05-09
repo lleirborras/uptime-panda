@@ -2299,6 +2299,31 @@
                                 </button>
                             </div>
 
+                            <!-- Network Interface Binding -->
+                            <div
+                                v-if="
+                                    monitor.type === 'http' ||
+                                    monitor.type === 'keyword' ||
+                                    monitor.type === 'json-query' ||
+                                    monitor.type === 'port' ||
+                                    monitor.type === 'ping'
+                                "
+                                class="my-3"
+                            >
+                                <label for="bindInterface" class="form-label">{{ $t("bindInterface") }}</label>
+                                <select id="bindInterface" v-model="monitor.bindInterface" class="form-select">
+                                    <option :value="null">{{ $t("bindInterfaceAuto") }}</option>
+                                    <option
+                                        v-for="iface in networkInterfaceList"
+                                        :key="iface.name + '-' + iface.address"
+                                        :value="iface.address"
+                                    >
+                                        {{ iface.name }} &mdash; {{ iface.address }} ({{ iface.family }})
+                                    </option>
+                                </select>
+                                <div class="form-text">{{ $t("bindInterfaceDescription") }}</div>
+                            </div>
+
                             <!-- Kafka SASL Options -->
                             <!-- Kafka Producer only -->
                             <template v-if="monitor.type === 'kafka-producer'">
@@ -3127,6 +3152,7 @@ const monitorDefaults = {
     rabbitmqPassword: "",
     conditions: [],
     system_service_name: "",
+    bindInterface: null,
 };
 
 export default {
@@ -3177,6 +3203,7 @@ export default {
                 confirmed: false,
                 editedValue: false,
             },
+            networkInterfaceList: [],
         };
     },
 
@@ -3755,6 +3782,12 @@ message HealthCheckResponse {
         this.dnsresolvetypeOptions = dnsresolvetypeOptions;
         this.globalpingdnsresolvetypeoptions = globalpingdnsresolvetypeoptions;
         this.kafkaSaslMechanismOptions = kafkaSaslMechanismOptions;
+
+        this.$root.getSocket().emit("getNetworkInterfaces", (res) => {
+            if (res.ok) {
+                this.networkInterfaceList = res.interfaces;
+            }
+        });
     },
     methods: {
         /**

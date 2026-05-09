@@ -974,6 +974,8 @@ let needSetup = false;
                     ping_numeric: monitor.ping_numeric,
                     ping_count: monitor.ping_count,
                     ping_per_request_timeout: monitor.ping_per_request_timeout,
+
+                    bind_interface: monitor.bindInterface || null,
                 };
 
                 Object.assign(bean, payload);
