@@ -2306,7 +2306,14 @@
                                     monitor.type === 'keyword' ||
                                     monitor.type === 'json-query' ||
                                     monitor.type === 'port' ||
-                                    monitor.type === 'ping'
+                                    monitor.type === 'ping' ||
+                                    monitor.type === 'mysql' ||
+                                    monitor.type === 'redis' ||
+                                    monitor.type === 'postgres' ||
+                                    monitor.type === 'mongodb' ||
+                                    monitor.type === 'mqtt' ||
+                                    monitor.type === 'rabbitmq' ||
+                                    monitor.type === 'snmp'
                                 "
                                 class="my-3"
                             >
