@@ -16,6 +16,10 @@ class SMTPMonitorType extends MonitorType {
             ignoreTLS: monitor.smtp_security === "nostarttls", // don't use STARTTLS even if it's available
             requireTLS: monitor.smtp_security === "starttls", // use STARTTLS or fail
         };
+
+        if (monitor.bind_interface) {
+            options.localAddress = monitor.bind_interface;
+        }
         let transporter = nodemailer.createTransport(options);
         try {
             await transporter.verify();

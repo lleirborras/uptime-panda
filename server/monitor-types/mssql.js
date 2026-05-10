@@ -28,9 +28,10 @@ class MssqlMonitorType extends MonitorType {
 
         const startTime = dayjs().valueOf();
         try {
+            const localAddress = monitor.bind_interface || undefined;
             if (hasConditions) {
                 // When conditions are enabled, expect a single value result
-                const result = await this.mssqlQuerySingleValue(monitor.database_connection_string, query);
+                const result = await this.mssqlQuerySingleValue(monitor.database_connection_string, query, localAddress);
                 heartbeat.ping = dayjs().valueOf() - startTime;
 
                 const conditionsResult = evaluateExpressionGroup(conditions, { result: String(result) });
@@ -43,7 +44,7 @@ class MssqlMonitorType extends MonitorType {
                 heartbeat.msg = "Query did meet specified conditions";
             } else {
                 // Backwards compatible: just check connection and return row count
-                const result = await this.mssqlQuery(monitor.database_connection_string, query);
+                const result = await this.mssqlQuery(monitor.database_connection_string, query, localAddress);
                 heartbeat.ping = dayjs().valueOf() - startTime;
                 heartbeat.status = UP;
                 heartbeat.msg = result;
@@ -62,12 +63,16 @@ class MssqlMonitorType extends MonitorType {
      * Run a query on MSSQL server (backwards compatible - returns row count)
      * @param {string} connectionString The database connection string
      * @param {string} query The query to validate the database with
+     * @param {string} localAddress Local IP address to bind to
      * @returns {Promise<string>} Row count message
      */
-    async mssqlQuery(connectionString, query) {
+    async mssqlQuery(connectionString, query, localAddress = undefined) {
         let pool;
         try {
             pool = new mssql.ConnectionPool(connectionString);
+            if (localAddress) {
+                pool.config.options = { ...(pool.config.options || {}), localAddress };
+            }
             await pool.connect();
             const result = await pool.request().query(query);
 
@@ -90,12 +95,16 @@ class MssqlMonitorType extends MonitorType {
      * Run a query on MSSQL server expecting a single value result
      * @param {string} connectionString The database connection string
      * @param {string} query The query to validate the database with
+     * @param {string} localAddress Local IP address to bind to
      * @returns {Promise<any>} Single value from the first column of the first row
      */
-    async mssqlQuerySingleValue(connectionString, query) {
+    async mssqlQuerySingleValue(connectionString, query, localAddress = undefined) {
         let pool;
         try {
             pool = new mssql.ConnectionPool(connectionString);
+            if (localAddress) {
+                pool.config.options = { ...(pool.config.options || {}), localAddress };
+            }
             await pool.connect();
             const result = await pool.request().query(query);
 

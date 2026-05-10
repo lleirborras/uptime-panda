@@ -2313,7 +2313,11 @@
                                     monitor.type === 'mongodb' ||
                                     monitor.type === 'mqtt' ||
                                     monitor.type === 'rabbitmq' ||
-                                    monitor.type === 'snmp'
+                                    monitor.type === 'snmp' ||
+                                    monitor.type === 'sqlserver' ||
+                                    monitor.type === 'smtp' ||
+                                    monitor.type === 'dns' ||
+                                    monitor.type === 'websocket-upgrade'
                                 "
                                 class="my-3"
                             >

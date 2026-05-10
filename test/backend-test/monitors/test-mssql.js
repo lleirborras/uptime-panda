@@ -260,5 +260,44 @@ describe(
                 await container.stop();
             }
         });
+
+        test("check() succeeds with bind_interface set to loopback (127.0.0.1)", async () => {
+            const { container, connectionString } = await createAndStartMSSQLContainer();
+
+            const mssqlMonitor = new MssqlMonitorType();
+            const monitor = {
+                database_connection_string: connectionString,
+                conditions: "[]",
+                bind_interface: "127.0.0.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await mssqlMonitor.check(monitor, heartbeat, {});
+                assert.strictEqual(heartbeat.status, UP);
+            } finally {
+                await container.stop();
+            }
+        });
+
+        test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
+            const { container, connectionString } = await createAndStartMSSQLContainer();
+
+            const mssqlMonitor = new MssqlMonitorType();
+            const monitor = {
+                database_connection_string: connectionString,
+                conditions: "[]",
+                bind_interface: "192.0.2.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await assert.rejects(mssqlMonitor.check(monitor, heartbeat, {}), /.+/);
+            } finally {
+                await container.stop();
+            }
+        });
     }
 );
