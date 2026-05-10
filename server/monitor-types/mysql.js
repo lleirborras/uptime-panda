@@ -2,6 +2,7 @@ const { MonitorType } = require("./monitor-type");
 const { UP } = require("../../src/util");
 const dayjs = require("dayjs");
 const mysql = require("mysql2");
+const net = require("net");
 const { ConditionVariable } = require("../monitor-conditions/variables");
 const { defaultStringOperators } = require("../monitor-conditions/operators");
 const { ConditionExpressionGroup } = require("../monitor-conditions/expression");
@@ -71,11 +72,16 @@ class MysqlMonitorType extends MonitorType {
      */
     mysqlQuery(connectionString, query, password = undefined, localAddress = undefined) {
         return new Promise((resolve, reject) => {
-            const connection = mysql.createConnection({
-                uri: connectionString,
-                password,
-                ...(localAddress ? { localAddress } : {}),
-            });
+            const connOpts = { uri: connectionString, password };
+            if (localAddress) {
+                const url = new URL(connectionString);
+                connOpts.stream = () => net.createConnection({
+                    host: url.hostname,
+                    port: Number(url.port) || 3306,
+                    localAddress,
+                });
+            }
+            const connection = mysql.createConnection(connOpts);
 
             connection.on("error", (err) => {
                 reject(err);
@@ -112,11 +118,16 @@ class MysqlMonitorType extends MonitorType {
      */
     mysqlQuerySingleValue(connectionString, query, password = undefined, localAddress = undefined) {
         return new Promise((resolve, reject) => {
-            const connection = mysql.createConnection({
-                uri: connectionString,
-                password,
-                ...(localAddress ? { localAddress } : {}),
-            });
+            const connOpts = { uri: connectionString, password };
+            if (localAddress) {
+                const url = new URL(connectionString);
+                connOpts.stream = () => net.createConnection({
+                    host: url.hostname,
+                    port: Number(url.port) || 3306,
+                    localAddress,
+                });
+            }
+            const connection = mysql.createConnection(connOpts);
 
             connection.on("error", (err) => {
                 reject(err);
