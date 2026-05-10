@@ -90,6 +90,51 @@ describe(
             // Should reject with any error (connection refused, timeout, etc.)
             await assert.rejects(rabbitMQMonitor.checkSingleNode(monitor, "http://localhost:15672", "1/1"), Error);
         });
+
+        test("check() succeeds with bind_interface set to loopback (127.0.0.1)", async () => {
+            const rabbitMQContainer = await new RabbitMQContainer("rabbitmq:3-management").withStartupTimeout(60000).start();
+            const rabbitMQMonitor = new RabbitMqMonitorType();
+            const connectionString = `http://${rabbitMQContainer.getHost()}:${rabbitMQContainer.getMappedPort(15672)}`;
+
+            const monitor = {
+                rabbitmq_nodes: JSON.stringify([connectionString]),
+                rabbitmq_username: "guest",
+                rabbitmq_password: "guest",
+                timeout: 10,
+                bind_interface: "127.0.0.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await rabbitMQMonitor.check(monitor, heartbeat, {});
+                assert.strictEqual(heartbeat.status, UP);
+            } finally {
+                await rabbitMQContainer.stop();
+            }
+        });
+
+        test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
+            const rabbitMQContainer = await new RabbitMQContainer("rabbitmq:3-management").withStartupTimeout(60000).start();
+            const rabbitMQMonitor = new RabbitMqMonitorType();
+            const connectionString = `http://${rabbitMQContainer.getHost()}:${rabbitMQContainer.getMappedPort(15672)}`;
+
+            const monitor = {
+                rabbitmq_nodes: JSON.stringify([connectionString]),
+                rabbitmq_username: "guest",
+                rabbitmq_password: "guest",
+                timeout: 10,
+                bind_interface: "192.0.2.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await assert.rejects(rabbitMQMonitor.check(monitor, heartbeat, {}), /.+/);
+            } finally {
+                await rabbitMQContainer.stop();
+            }
+        });
     }
 );
 

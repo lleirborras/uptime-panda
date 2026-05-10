@@ -39,6 +39,13 @@ class SNMPMonitorType extends MonitorType {
                 throw new Error(`Error creating SNMP session: ${error.message}`);
             });
 
+            if (monitor.bind_interface) {
+                await new Promise((resolve, reject) => {
+                    session.dgram.once("error", reject);
+                    session.dgram.bind({ address: monitor.bind_interface }, resolve);
+                });
+            }
+
             const varbinds = await new Promise((resolve, reject) => {
                 session.get([monitor.snmp_oid], (error, varbinds) => {
                     error ? reject(error) : resolve(varbinds);
