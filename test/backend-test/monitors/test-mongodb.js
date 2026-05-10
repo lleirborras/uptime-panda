@@ -52,7 +52,9 @@ describe(
 
             const mongoMonitor = new MongodbMonitorType();
             const monitor = {
-                database_connection_string: `mongodb://${container.getHost()}:${container.getMappedPort(27017)}`,
+                // Use 127.0.0.1 explicitly — container.getHost() may return "localhost" which
+                // resolves to ::1 on some Linux systems, causing IPv4 localAddress binding to fail
+                database_connection_string: `mongodb://127.0.0.1:${container.getMappedPort(27017)}`,
                 bind_interface: "127.0.0.1",
             };
 
@@ -75,7 +77,7 @@ describe(
 
             const mongoMonitor = new MongodbMonitorType();
             const monitor = {
-                database_connection_string: `mongodb://${container.getHost()}:${container.getMappedPort(27017)}`,
+                database_connection_string: `mongodb://127.0.0.1:${container.getMappedPort(27017)}`,
                 bind_interface: "192.0.2.1",
             };
 

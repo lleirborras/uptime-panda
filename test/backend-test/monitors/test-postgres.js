@@ -57,7 +57,9 @@ describe(
 
             const postgresMonitor = new PostgresMonitorType();
             const monitor = {
-                database_connection_string: postgresContainer.getConnectionUri(),
+                // Force 127.0.0.1 — getConnectionUri() uses "localhost" which may resolve to
+                // ::1 on Linux, causing IPv4 localAddress to be bound to an IPv6 socket (EINVAL)
+                database_connection_string: postgresContainer.getConnectionUri().replace("localhost", "127.0.0.1"),
                 bind_interface: "127.0.0.1",
             };
 
@@ -78,7 +80,7 @@ describe(
 
             const postgresMonitor = new PostgresMonitorType();
             const monitor = {
-                database_connection_string: postgresContainer.getConnectionUri(),
+                database_connection_string: postgresContainer.getConnectionUri().replace("localhost", "127.0.0.1"),
                 bind_interface: "192.0.2.1",
             };
 

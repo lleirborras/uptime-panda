@@ -236,13 +236,15 @@ describe(
 
         test("check() succeeds with bind_interface set to loopback (127.0.0.1)", async () => {
             const hiveMQContainer = await new HiveMQContainer("hivemq/hivemq-ce").start();
-            const connectionString = hiveMQContainer.getConnectionString();
+            // Replace "localhost" with "127.0.0.1" to force an IPv4 socket — on Linux
+            // "localhost" may resolve to ::1, causing IPv4 localAddress binding to fail with EINVAL
+            const rawCs = hiveMQContainer.getConnectionString().replace("localhost", "127.0.0.1");
             const mqttMonitorType = new MqttMonitorType();
             const monitor = {
                 json_path: "firstProp",
-                hostname: connectionString.split(":", 2).join(":"),
+                hostname: rawCs.split(":", 2).join(":"),
                 mqtt_topic: "test",
-                port: connectionString.split(":")[2],
+                port: rawCs.split(":")[2],
                 mqtt_username: null,
                 mqtt_password: null,
                 mqtt_websocket_path: null,
@@ -254,7 +256,7 @@ describe(
             };
             const heartbeat = { msg: "", status: PENDING };
 
-            const publisher = mqtt.connect(hiveMQContainer.getConnectionString());
+            const publisher = mqtt.connect(rawCs);
             publisher.on("connect", () => {
                 publisher.subscribe("test", (err) => {
                     if (!err) {
@@ -274,13 +276,13 @@ describe(
 
         test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
             const hiveMQContainer = await new HiveMQContainer("hivemq/hivemq-ce").start();
-            const connectionString = hiveMQContainer.getConnectionString();
+            const rawCs = hiveMQContainer.getConnectionString().replace("localhost", "127.0.0.1");
             const mqttMonitorType = new MqttMonitorType();
             const monitor = {
                 json_path: "firstProp",
-                hostname: connectionString.split(":", 2).join(":"),
+                hostname: rawCs.split(":", 2).join(":"),
                 mqtt_topic: "test",
-                port: connectionString.split(":")[2],
+                port: rawCs.split(":")[2],
                 mqtt_username: null,
                 mqtt_password: null,
                 mqtt_websocket_path: null,

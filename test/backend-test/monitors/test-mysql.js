@@ -139,7 +139,9 @@ describe(
 
             const mysqlMonitor = new MysqlMonitorType();
             const monitor = {
-                database_connection_string: connectionString,
+                // Replace container.getHost() ("localhost") with 127.0.0.1 to force IPv4 —
+                // on Linux, "localhost" may resolve to ::1 causing localAddress (IPv4) to be silently ignored
+                database_connection_string: connectionString.replace(container.getHost(), "127.0.0.1"),
                 conditions: "[]",
                 bind_interface: "127.0.0.1",
             };
@@ -159,7 +161,7 @@ describe(
 
             const mysqlMonitor = new MysqlMonitorType();
             const monitor = {
-                database_connection_string: connectionString,
+                database_connection_string: connectionString.replace(container.getHost(), "127.0.0.1"),
                 conditions: "[]",
                 bind_interface: "192.0.2.1",
             };

@@ -54,7 +54,9 @@ describe(
 
             const redisMonitor = new RedisMonitorType();
             const monitor = {
-                database_connection_string: `redis://${container.getHost()}:${container.getMappedPort(6379)}`,
+                // Use 127.0.0.1 explicitly — container.getHost() may return "localhost" which
+                // resolves to ::1 on some Linux systems, causing IPv4 localAddress binding to fail
+                database_connection_string: `redis://127.0.0.1:${container.getMappedPort(6379)}`,
                 ignore_tls: true,
                 bind_interface: "127.0.0.1",
             };
@@ -78,7 +80,7 @@ describe(
 
             const redisMonitor = new RedisMonitorType();
             const monitor = {
-                database_connection_string: `redis://${container.getHost()}:${container.getMappedPort(6379)}`,
+                database_connection_string: `redis://127.0.0.1:${container.getMappedPort(6379)}`,
                 ignore_tls: true,
                 bind_interface: "192.0.2.1",
             };
