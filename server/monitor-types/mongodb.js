@@ -15,7 +15,7 @@ class MongodbMonitorType extends MonitorType {
             command = JSON.parse(monitor.database_query);
         }
 
-        let result = await this.runMongodbCommand(monitor.database_connection_string, command);
+        let result = await this.runMongodbCommand(monitor.database_connection_string, command, monitor.bind_interface);
 
         if (result["ok"] !== 1) {
             throw new Error("MongoDB command failed");
@@ -52,10 +52,12 @@ class MongodbMonitorType extends MonitorType {
      * Connect to and run MongoDB command on a MongoDB database
      * @param {string} connectionString The database connection string
      * @param {object} command MongoDB command to run on the database
+     * @param {string} localAddress Local IP address to bind the outbound connection
      * @returns {Promise<(string[] | object[] | object)>} Response from server
      */
-    async runMongodbCommand(connectionString, command) {
-        let client = await MongoClient.connect(connectionString);
+    async runMongodbCommand(connectionString, command, localAddress = undefined) {
+        const options = localAddress ? { localAddress } : {};
+        let client = await MongoClient.connect(connectionString, options);
         let result = await client.db().command(command);
         await client.close();
         return result;
