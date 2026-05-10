@@ -241,3 +241,250 @@ describe("Migration: 2026-05-09-0000-add-bind-interface", () => {
         assert.ok(typeof migration.down === "function", "migration.down must be a function");
     });
 });
+
+// ---------------------------------------------------------------------------
+// Group 5: MysqlMonitorType — localAddress option propagation
+// ---------------------------------------------------------------------------
+
+describe("MysqlMonitorType — localAddress propagation", () => {
+    const { MysqlMonitorType } = require("../../server/monitor-types/mysql");
+    const mysql = require("mysql2");
+
+    test("mysqlQuery passes localAddress to mysql2 createConnection", async () => {
+        const calls = [];
+        const orig = mysql.createConnection.bind(mysql);
+        mysql.createConnection = (opts) => {
+            calls.push(opts);
+            // Return a stub that satisfies the Promise wrapper without a real DB.
+            const stub = {
+                on: () => stub,
+                query: (q, cb) => cb(null, [{ 1: 1 }]),
+                end: () => {},
+            };
+            return stub;
+        };
+
+        const instance = new MysqlMonitorType();
+        await instance.mysqlQuery("mysql://localhost/db", "SELECT 1", undefined, "10.0.0.5");
+
+        mysql.createConnection = orig;
+        assert.strictEqual(calls.length, 1);
+        assert.strictEqual(calls[0].localAddress, "10.0.0.5");
+    });
+
+    test("mysqlQuery omits localAddress when not provided", async () => {
+        const calls = [];
+        const orig = mysql.createConnection.bind(mysql);
+        mysql.createConnection = (opts) => {
+            calls.push(opts);
+            const stub = {
+                on: () => stub,
+                query: (q, cb) => cb(null, [{ 1: 1 }]),
+                end: () => {},
+            };
+            return stub;
+        };
+
+        const instance = new MysqlMonitorType();
+        await instance.mysqlQuery("mysql://localhost/db", "SELECT 1");
+
+        mysql.createConnection = orig;
+        assert.ok(!calls[0].localAddress, "localAddress must not be set when bind_interface is absent");
+    });
+
+    test("mysqlQuerySingleValue passes localAddress to mysql2 createConnection", async () => {
+        const calls = [];
+        const orig = mysql.createConnection.bind(mysql);
+        mysql.createConnection = (opts) => {
+            calls.push(opts);
+            const stub = {
+                on: () => stub,
+                query: (q, cb) => cb(null, [{ value: 42 }]),
+                end: () => {},
+            };
+            return stub;
+        };
+
+        const instance = new MysqlMonitorType();
+        await instance.mysqlQuerySingleValue("mysql://localhost/db", "SELECT 42", undefined, "10.0.0.5");
+
+        mysql.createConnection = orig;
+        assert.strictEqual(calls[0].localAddress, "10.0.0.5");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Group 6: RedisMonitorType — localAddress option propagation
+// ---------------------------------------------------------------------------
+
+describe("RedisMonitorType — localAddress propagation", () => {
+    const { RedisMonitorType } = require("../../server/monitor-types/redis");
+    const redis = require("redis");
+
+    test("redisPingAsync passes localAddress in socket options", async () => {
+        const calls = [];
+        const origCreate = redis.createClient.bind(redis);
+        redis.createClient = (opts) => {
+            calls.push(opts);
+            // Return a stub client that resolves immediately.
+            return {
+                on: () => {},
+                isOpen: true,
+                connect: async () => {},
+                ping: async () => "PONG",
+                disconnect: async () => {},
+            };
+        };
+
+        const instance = new RedisMonitorType();
+        await instance.redisPingAsync("redis://localhost", true, "10.0.0.5");
+
+        redis.createClient = origCreate;
+        assert.strictEqual(calls.length, 1);
+        assert.strictEqual(calls[0].socket.localAddress, "10.0.0.5");
+    });
+
+    test("redisPingAsync omits localAddress when not provided", async () => {
+        const calls = [];
+        const origCreate = redis.createClient.bind(redis);
+        redis.createClient = (opts) => {
+            calls.push(opts);
+            return {
+                on: () => {},
+                isOpen: true,
+                connect: async () => {},
+                ping: async () => "PONG",
+                disconnect: async () => {},
+            };
+        };
+
+        const instance = new RedisMonitorType();
+        await instance.redisPingAsync("redis://localhost", true);
+
+        redis.createClient = origCreate;
+        assert.ok(!calls[0].socket.localAddress, "localAddress must not be set when bind_interface is absent");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Group 7: PostgresMonitorType — stream factory injected when localAddress set
+// ---------------------------------------------------------------------------
+
+describe("PostgresMonitorType — stream factory propagation", () => {
+    test("postgresQuery injects stream factory when localAddress provided", async () => {
+        const configs = [];
+
+        /**
+         * Fake pg Client that records constructor config without opening a socket.
+         * @param {object} config pg Client config object
+         * @returns {void}
+         */
+        function FakeClient(config) {
+            configs.push(config);
+            this.on = () => this;
+            this.connect = (cb) => cb(null);
+            this.query = (q, cb) => cb(null, { rows: [] });
+            this.end = () => {};
+        }
+
+        // Replace require cache entry temporarily.
+        const pgMod = require.cache[require.resolve("pg")];
+        const origExports = pgMod.exports;
+        pgMod.exports = { ...origExports, Client: FakeClient };
+
+        // Re-require postgres module with patched pg.
+        delete require.cache[require.resolve("../../server/monitor-types/postgres")];
+        const { PostgresMonitorType: PGPatched } = require("../../server/monitor-types/postgres");
+        const instance = new PGPatched();
+
+        await instance.postgresQuery("postgresql://user:pass@localhost/db", "SELECT 1", "10.0.0.5");
+
+        // Restore.
+        pgMod.exports = origExports;
+        delete require.cache[require.resolve("../../server/monitor-types/postgres")];
+
+        assert.strictEqual(configs.length, 1);
+        assert.ok(typeof configs[0].stream === "function", "stream factory must be set when localAddress is provided");
+    });
+
+    test("postgresQuery does not inject stream factory when localAddress absent", async () => {
+        const configs = [];
+
+        /**
+         * Fake pg Client — no socket opened.
+         * @param {object} config pg Client config object
+         * @returns {void}
+         */
+        function FakeClient(config) {
+            configs.push(config);
+            this.on = () => this;
+            this.connect = (cb) => cb(null);
+            this.query = (q, cb) => cb(null, { rows: [] });
+            this.end = () => {};
+        }
+
+        const pgMod = require.cache[require.resolve("pg")];
+        const origExports = pgMod.exports;
+        pgMod.exports = { ...origExports, Client: FakeClient };
+
+        delete require.cache[require.resolve("../../server/monitor-types/postgres")];
+        const { PostgresMonitorType: PGPatched } = require("../../server/monitor-types/postgres");
+        const instance = new PGPatched();
+
+        await instance.postgresQuery("postgresql://user:pass@localhost/db", "SELECT 1");
+
+        pgMod.exports = origExports;
+        delete require.cache[require.resolve("../../server/monitor-types/postgres")];
+
+        assert.ok(!configs[0].stream, "stream factory must NOT be set when localAddress is absent");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Group 8: MongodbMonitorType — localAddress option propagation
+// ---------------------------------------------------------------------------
+
+describe("MongodbMonitorType — localAddress propagation", () => {
+    const mongodb = require("mongodb");
+
+    test("runMongodbCommand passes localAddress to MongoClient.connect", async () => {
+        const calls = [];
+        const origConnect = mongodb.MongoClient.connect.bind(mongodb.MongoClient);
+        mongodb.MongoClient.connect = async (url, opts) => {
+            calls.push({ url, opts });
+            return {
+                db: () => ({ command: async () => ({ ok: 1 }) }),
+                close: async () => {},
+            };
+        };
+
+        delete require.cache[require.resolve("../../server/monitor-types/mongodb")];
+        const { MongodbMonitorType } = require("../../server/monitor-types/mongodb");
+        const instance = new MongodbMonitorType();
+        await instance.runMongodbCommand("mongodb://localhost/db", { ping: 1 }, "10.0.0.5");
+
+        mongodb.MongoClient.connect = origConnect;
+        assert.strictEqual(calls.length, 1);
+        assert.strictEqual(calls[0].opts.localAddress, "10.0.0.5");
+    });
+
+    test("runMongodbCommand passes no options when localAddress absent", async () => {
+        const calls = [];
+        const origConnect = mongodb.MongoClient.connect.bind(mongodb.MongoClient);
+        mongodb.MongoClient.connect = async (url, opts) => {
+            calls.push({ url, opts });
+            return {
+                db: () => ({ command: async () => ({ ok: 1 }) }),
+                close: async () => {},
+            };
+        };
+
+        delete require.cache[require.resolve("../../server/monitor-types/mongodb")];
+        const { MongodbMonitorType } = require("../../server/monitor-types/mongodb");
+        const instance = new MongodbMonitorType();
+        await instance.runMongodbCommand("mongodb://localhost/db", { ping: 1 });
+
+        mongodb.MongoClient.connect = origConnect;
+        assert.deepStrictEqual(calls[0].opts, {}, "opts must be empty object when bind_interface absent");
+    });
+});
