@@ -49,5 +49,26 @@ describe(
 
             await assert.rejects(postgresMonitor.check(monitor, heartbeat, {}), regex);
         });
+
+        test("check() succeeds with bind_interface set to loopback (127.0.0.1)", async () => {
+            const postgresContainer = await new PostgreSqlContainer("postgres:latest")
+                .withStartupTimeout(60000)
+                .start();
+
+            const postgresMonitor = new PostgresMonitorType();
+            const monitor = {
+                database_connection_string: postgresContainer.getConnectionUri(),
+                bind_interface: "127.0.0.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await postgresMonitor.check(monitor, heartbeat, {});
+                assert.strictEqual(heartbeat.status, UP);
+            } finally {
+                postgresContainer.stop();
+            }
+        });
     }
 );

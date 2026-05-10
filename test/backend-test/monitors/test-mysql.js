@@ -133,5 +133,25 @@ describe(
                 await container.stop();
             }
         });
+
+        test("check() succeeds with bind_interface set to loopback (127.0.0.1)", async () => {
+            const { container, connectionString } = await createAndStartMariaDBContainer();
+
+            const mysqlMonitor = new MysqlMonitorType();
+            const monitor = {
+                database_connection_string: connectionString,
+                conditions: "[]",
+                bind_interface: "127.0.0.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await mysqlMonitor.check(monitor, heartbeat, {});
+                assert.strictEqual(heartbeat.status, UP);
+            } finally {
+                await container.stop();
+            }
+        });
     }
 );
