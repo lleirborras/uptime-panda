@@ -153,5 +153,24 @@ describe(
                 await container.stop();
             }
         });
+
+        test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
+            const { container, connectionString } = await createAndStartMariaDBContainer();
+
+            const mysqlMonitor = new MysqlMonitorType();
+            const monitor = {
+                database_connection_string: connectionString,
+                conditions: "[]",
+                bind_interface: "192.0.2.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await assert.rejects(mysqlMonitor.check(monitor, heartbeat, {}), /.+/);
+            } finally {
+                await container.stop();
+            }
+        });
     }
 );

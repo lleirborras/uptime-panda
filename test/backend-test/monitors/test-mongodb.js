@@ -65,5 +65,27 @@ describe(
                 await container.stop();
             }
         });
+
+        test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
+            const container = await new GenericContainer("mongo:7")
+                .withExposedPorts(27017)
+                .withWaitStrategy(Wait.forLogMessage("Waiting for connections"))
+                .withStartupTimeout(60000)
+                .start();
+
+            const mongoMonitor = new MongodbMonitorType();
+            const monitor = {
+                database_connection_string: `mongodb://${container.getHost()}:${container.getMappedPort(27017)}`,
+                bind_interface: "192.0.2.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await assert.rejects(mongoMonitor.check(monitor, heartbeat, {}), /.+/);
+            } finally {
+                await container.stop();
+            }
+        });
     }
 );

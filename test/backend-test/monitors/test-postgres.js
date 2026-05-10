@@ -70,5 +70,25 @@ describe(
                 postgresContainer.stop();
             }
         });
+
+        test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
+            const postgresContainer = await new PostgreSqlContainer("postgres:latest")
+                .withStartupTimeout(60000)
+                .start();
+
+            const postgresMonitor = new PostgresMonitorType();
+            const monitor = {
+                database_connection_string: postgresContainer.getConnectionUri(),
+                bind_interface: "192.0.2.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await assert.rejects(postgresMonitor.check(monitor, heartbeat, {}), /.+/);
+            } finally {
+                postgresContainer.stop();
+            }
+        });
     }
 );

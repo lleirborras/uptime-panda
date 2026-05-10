@@ -68,5 +68,28 @@ describe(
                 await container.stop();
             }
         });
+
+        test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
+            const container = await new GenericContainer("redis:7-alpine")
+                .withExposedPorts(6379)
+                .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
+                .withStartupTimeout(60000)
+                .start();
+
+            const redisMonitor = new RedisMonitorType();
+            const monitor = {
+                database_connection_string: `redis://${container.getHost()}:${container.getMappedPort(6379)}`,
+                ignore_tls: true,
+                bind_interface: "192.0.2.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await assert.rejects(redisMonitor.check(monitor, heartbeat, {}), /.+/);
+            } finally {
+                await container.stop();
+            }
+        });
     }
 );
