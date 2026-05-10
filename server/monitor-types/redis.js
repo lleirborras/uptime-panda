@@ -9,7 +9,7 @@ class RedisMonitorType extends MonitorType {
      * @inheritdoc
      */
     async check(monitor, heartbeat, _server) {
-        heartbeat.msg = await this.redisPingAsync(monitor.database_connection_string, !monitor.ignore_tls);
+        heartbeat.msg = await this.redisPingAsync(monitor.database_connection_string, !monitor.ignore_tls, monitor.bind_interface);
         heartbeat.status = UP;
     }
 
@@ -17,14 +17,16 @@ class RedisMonitorType extends MonitorType {
      * Redis server ping
      * @param {string} dsn The redis connection string
      * @param {boolean} rejectUnauthorized If false, allows unverified server certificates.
+     * @param {string} localAddress Local IP address to bind the outbound connection
      * @returns {Promise<any>} Response from redis server
      */
-    redisPingAsync(dsn, rejectUnauthorized) {
+    redisPingAsync(dsn, rejectUnauthorized, localAddress = undefined) {
         return new Promise((resolve, reject) => {
             const client = redis.createClient({
                 url: dsn,
                 socket: {
                     rejectUnauthorized,
+                    ...(localAddress ? { localAddress } : {}),
                 },
             });
             client.on("error", (err) => {

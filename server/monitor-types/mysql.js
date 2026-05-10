@@ -33,7 +33,7 @@ class MysqlMonitorType extends MonitorType {
         try {
             if (hasConditions) {
                 // When conditions are enabled, expect a single value result
-                const result = await this.mysqlQuerySingleValue(monitor.database_connection_string, query, password);
+                const result = await this.mysqlQuerySingleValue(monitor.database_connection_string, query, password, monitor.bind_interface);
                 heartbeat.ping = dayjs().valueOf() - startTime;
 
                 const conditionsResult = evaluateExpressionGroup(conditions, { result: String(result) });
@@ -46,7 +46,7 @@ class MysqlMonitorType extends MonitorType {
                 heartbeat.msg = "Query did meet specified conditions";
             } else {
                 // Backwards compatible: just check connection and return row count
-                const result = await this.mysqlQuery(monitor.database_connection_string, query, password);
+                const result = await this.mysqlQuery(monitor.database_connection_string, query, password, monitor.bind_interface);
                 heartbeat.ping = dayjs().valueOf() - startTime;
                 heartbeat.status = UP;
                 heartbeat.msg = result;
@@ -66,13 +66,15 @@ class MysqlMonitorType extends MonitorType {
      * @param {string} connectionString The database connection string
      * @param {string} query The query to execute
      * @param {string} password Optional password override
+     * @param {string} localAddress Local IP address to bind the outbound connection
      * @returns {Promise<string>} Row count message
      */
-    mysqlQuery(connectionString, query, password = undefined) {
+    mysqlQuery(connectionString, query, password = undefined, localAddress = undefined) {
         return new Promise((resolve, reject) => {
             const connection = mysql.createConnection({
                 uri: connectionString,
                 password,
+                ...(localAddress ? { localAddress } : {}),
             });
 
             connection.on("error", (err) => {
@@ -105,13 +107,15 @@ class MysqlMonitorType extends MonitorType {
      * @param {string} connectionString The database connection string
      * @param {string} query The query to execute
      * @param {string} password Optional password override
+     * @param {string} localAddress Local IP address to bind the outbound connection
      * @returns {Promise<any>} Single value from the first column of the first row
      */
-    mysqlQuerySingleValue(connectionString, query, password = undefined) {
+    mysqlQuerySingleValue(connectionString, query, password = undefined, localAddress = undefined) {
         return new Promise((resolve, reject) => {
             const connection = mysql.createConnection({
                 uri: connectionString,
                 password,
+                ...(localAddress ? { localAddress } : {}),
             });
 
             connection.on("error", (err) => {
