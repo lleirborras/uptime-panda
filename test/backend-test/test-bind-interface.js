@@ -250,7 +250,7 @@ describe("MysqlMonitorType — localAddress propagation", () => {
     const { MysqlMonitorType } = require("../../server/monitor-types/mysql");
     const mysql = require("mysql2");
 
-    test("mysqlQuery passes localAddress to mysql2 createConnection", async () => {
+    test("mysqlQuery uses stream factory when localAddress provided", async () => {
         const calls = [];
         const orig = mysql.createConnection.bind(mysql);
         mysql.createConnection = (opts) => {
@@ -269,10 +269,10 @@ describe("MysqlMonitorType — localAddress propagation", () => {
 
         mysql.createConnection = orig;
         assert.strictEqual(calls.length, 1);
-        assert.strictEqual(calls[0].localAddress, "10.0.0.5");
+        assert.strictEqual(typeof calls[0].stream, "function", "stream factory must be set when localAddress is provided");
     });
 
-    test("mysqlQuery omits localAddress when not provided", async () => {
+    test("mysqlQuery omits stream factory when localAddress not provided", async () => {
         const calls = [];
         const orig = mysql.createConnection.bind(mysql);
         mysql.createConnection = (opts) => {
@@ -289,10 +289,10 @@ describe("MysqlMonitorType — localAddress propagation", () => {
         await instance.mysqlQuery("mysql://localhost/db", "SELECT 1");
 
         mysql.createConnection = orig;
-        assert.ok(!calls[0].localAddress, "localAddress must not be set when bind_interface is absent");
+        assert.ok(!calls[0].stream, "stream must not be set when bind_interface is absent");
     });
 
-    test("mysqlQuerySingleValue passes localAddress to mysql2 createConnection", async () => {
+    test("mysqlQuerySingleValue uses stream factory when localAddress provided", async () => {
         const calls = [];
         const orig = mysql.createConnection.bind(mysql);
         mysql.createConnection = (opts) => {
@@ -309,7 +309,7 @@ describe("MysqlMonitorType — localAddress propagation", () => {
         await instance.mysqlQuerySingleValue("mysql://localhost/db", "SELECT 42", undefined, "10.0.0.5");
 
         mysql.createConnection = orig;
-        assert.strictEqual(calls[0].localAddress, "10.0.0.5");
+        assert.strictEqual(typeof calls[0].stream, "function", "stream factory must be set when localAddress is provided");
     });
 });
 
