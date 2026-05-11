@@ -233,5 +233,72 @@ describe(
             const heartbeat = await testMqtt("", null, "operation success", "test", "test", conditions);
             assert.strictEqual(heartbeat.status, UP);
         });
+
+        test("check() succeeds with bind_interface set to loopback (127.0.0.1)", async () => {
+            const hiveMQContainer = await new HiveMQContainer("hivemq/hivemq-ce").start();
+            // Replace "localhost" with "127.0.0.1" to force an IPv4 socket — on Linux
+            // "localhost" may resolve to ::1, causing IPv4 localAddress binding to fail with EINVAL
+            const rawCs = hiveMQContainer.getConnectionString().replace("localhost", "127.0.0.1");
+            const mqttMonitorType = new MqttMonitorType();
+            const monitor = {
+                json_path: "firstProp",
+                hostname: rawCs.split(":", 2).join(":"),
+                mqtt_topic: "test",
+                port: rawCs.split(":")[2],
+                mqtt_username: null,
+                mqtt_password: null,
+                mqtt_websocket_path: null,
+                interval: 20,
+                mqtt_success_message: "KEYWORD",
+                mqtt_check_type: "keyword",
+                conditions: null,
+                bind_interface: "127.0.0.1",
+            };
+            const heartbeat = { msg: "", status: PENDING };
+
+            const publisher = mqtt.connect(rawCs);
+            publisher.on("connect", () => {
+                publisher.subscribe("test", (err) => {
+                    if (!err) {
+                        publisher.publish("test", "-> KEYWORD <-");
+                    }
+                });
+            });
+
+            try {
+                await mqttMonitorType.check(monitor, heartbeat, {});
+                assert.strictEqual(heartbeat.status, UP);
+            } finally {
+                publisher.end();
+                await hiveMQContainer.stop();
+            }
+        });
+
+        test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
+            const hiveMQContainer = await new HiveMQContainer("hivemq/hivemq-ce").start();
+            const rawCs = hiveMQContainer.getConnectionString().replace("localhost", "127.0.0.1");
+            const mqttMonitorType = new MqttMonitorType();
+            const monitor = {
+                json_path: "firstProp",
+                hostname: rawCs.split(":", 2).join(":"),
+                mqtt_topic: "test",
+                port: rawCs.split(":")[2],
+                mqtt_username: null,
+                mqtt_password: null,
+                mqtt_websocket_path: null,
+                interval: 20,
+                mqtt_success_message: "KEYWORD",
+                mqtt_check_type: "keyword",
+                conditions: null,
+                bind_interface: "192.0.2.1",
+            };
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await assert.rejects(mqttMonitorType.check(monitor, heartbeat, {}), /.+/);
+            } finally {
+                await hiveMQContainer.stop();
+            }
+        });
     }
 );

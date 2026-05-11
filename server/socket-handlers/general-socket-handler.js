@@ -132,4 +132,33 @@ module.exports.generalSocketHandler = (socket, server) => {
         },
         { logNamespace: "disconnectAllSocketClients", fallbackMsg: "Failed to disconnect other socket clients" }
     );
+
+    onAuthed(
+        socket,
+        "getNetworkInterfaces",
+        async (socket, callback) => {
+            const { networkInterfaces } = require("os");
+            const nets = networkInterfaces();
+            const result = [];
+            for (const [ifaceName, addresses] of Object.entries(nets)) {
+                for (const addr of addresses) {
+                    if (addr.internal) {
+                        continue;
+                    }
+                    result.push({ name: ifaceName, address: addr.address, family: addr.family });
+                }
+            }
+            result.sort((a, b) => {
+                if (a.family === "IPv4" && b.family === "IPv6") {
+                    return -1;
+                }
+                if (a.family === "IPv6" && b.family === "IPv4") {
+                    return 1;
+                }
+                return a.name.localeCompare(b.name) || a.address.localeCompare(b.address);
+            });
+            callback({ ok: true, interfaces: result });
+        },
+        { fallbackMsg: "Failed to get network interfaces" }
+    );
 };

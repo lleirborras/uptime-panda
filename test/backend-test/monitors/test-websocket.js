@@ -423,4 +423,41 @@ describe("WebSocket Monitor", {}, () => {
             "X-Test": "test-value",
         });
     });
+
+    test("check() succeeds with bind_interface set to loopback (127.0.0.1)", async (t) => {
+        const websocketMonitor = new WebSocketMonitorType();
+        const { server: wss, port } = await createWebSocketServer();
+        t.after(() => wss.close());
+
+        const monitor = {
+            url: `ws://127.0.0.1:${port}`,
+            ws_ignore_sec_websocket_accept_header: false,
+            accepted_statuscodes_json: JSON.stringify(["1000"]),
+            timeout: 30,
+            bind_interface: "127.0.0.1",
+        };
+
+        const heartbeat = { msg: "", status: PENDING };
+
+        await websocketMonitor.check(monitor, heartbeat, {});
+        assert.strictEqual(heartbeat.status, UP);
+    });
+
+    test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async (t) => {
+        const websocketMonitor = new WebSocketMonitorType();
+        const { server: wss, port } = await createWebSocketServer();
+        t.after(() => wss.close());
+
+        const monitor = {
+            url: `ws://127.0.0.1:${port}`,
+            ws_ignore_sec_websocket_accept_header: false,
+            accepted_statuscodes_json: JSON.stringify(["1000"]),
+            timeout: 30,
+            bind_interface: "192.0.2.1",
+        };
+
+        const heartbeat = { msg: "", status: PENDING };
+
+        await assert.rejects(websocketMonitor.check(monitor, heartbeat, {}), /.+/);
+    });
 });

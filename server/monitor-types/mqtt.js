@@ -1,6 +1,7 @@
 const { MonitorType } = require("./monitor-type");
 const { log, UP } = require("../../src/util");
 const mqtt = require("mqtt");
+const net = require("net");
 const jsonata = require("jsonata");
 const { ConditionVariable } = require("../monitor-conditions/variables");
 const { defaultStringOperators, defaultNumberOperators } = require("../monitor-conditions/operators");
@@ -28,6 +29,7 @@ class MqttMonitorType extends MonitorType {
             password: monitor.mqtt_password,
             interval: monitor.interval,
             websocketPath: monitor.mqtt_websocket_path,
+            localAddress: monitor.bind_interface || undefined,
         });
 
         if (monitor.mqtt_check_type == null || monitor.mqtt_check_type === "") {
@@ -131,12 +133,12 @@ class MqttMonitorType extends MonitorType {
      * @param {string} hostname Hostname / address of machine to test
      * @param {string} topic MQTT topic
      * @param {object} options MQTT options. Contains port, username,
-     * password, websocketPath and interval (interval defaults to 20)
+     * password, websocketPath, localAddress and interval (interval defaults to 20)
      * @returns {Promise<string>} Received MQTT message
      */
     mqttAsync(hostname, topic, options = {}) {
         return new Promise((resolve, reject) => {
-            const { port, username, password, websocketPath, interval = 20 } = options;
+            const { port, username, password, websocketPath, interval = 20, localAddress } = options;
 
             // Adds MQTT protocol to the hostname if not already present
             if (!/^(?:http|mqtt|ws)s?:\/\//.test(hostname)) {
@@ -164,11 +166,32 @@ class MqttMonitorType extends MonitorType {
 
             log.debug(this.name, `MQTT connecting to ${mqttUrl}`);
 
-            let client = mqtt.connect(mqttUrl, {
+            const clientOpts = {
                 username,
                 password,
                 clientId: "uptime-kuma_" + Math.random().toString(16).substr(2, 8),
-            });
+            };
+
+            let client;
+            if (localAddress && (hostname.startsWith("mqtt://") || hostname.startsWith("tcp://"))) {
+                // mqtt's built-in tcp builder calls net.createConnection(port, host)
+                // (positional args), ignoring extra options. Use MqttClient directly
+                // with a custom stream builder that injects localAddress.
+                const parsedUrl = new URL(mqttUrl);
+                const streamBuilder = () => net.createConnection({
+                    host: parsedUrl.hostname,
+                    port: Number(parsedUrl.port) || 1883,
+                    localAddress,
+                });
+                client = new mqtt.MqttClient(streamBuilder, clientOpts);
+            } else if (localAddress && (hostname.startsWith("mqtts://") || hostname.startsWith("ssl://"))) {
+                // TLS: tls.connect(opts) already receives the full opts object,
+                // so adding localAddress to clientOpts is sufficient.
+                clientOpts.localAddress = localAddress;
+                client = mqtt.connect(mqttUrl, clientOpts);
+            } else {
+                client = mqtt.connect(mqttUrl, clientOpts);
+            }
 
             client.on("connect", () => {
                 log.debug(this.name, "MQTT connected");

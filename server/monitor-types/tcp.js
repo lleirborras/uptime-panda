@@ -97,6 +97,31 @@ const tcping = (hostname, port) => {
     });
 };
 
+/**
+ * TCP connectivity check with local address binding.
+ * @param {string} hostname Destination hostname
+ * @param {number} port Destination port
+ * @param {string} localAddress Local IP to bind
+ * @param {number} timeoutSec Timeout in seconds (default: 10)
+ * @returns {Promise<number>} RTT in ms
+ */
+const tcpingBound = (hostname, port, localAddress, timeoutSec = 10) => {
+    return new Promise((resolve, reject) => {
+        const start = Date.now();
+        const socket = net.createConnection({ host: hostname, port, localAddress });
+        socket.on("connect", () => {
+            const ms = Date.now() - start;
+            socket.destroy();
+            resolve(ms);
+        });
+        socket.on("error", reject);
+        socket.setTimeout(timeoutSec * 1000, () => {
+            socket.destroy();
+            reject(new Error("Connection timed out"));
+        });
+    });
+};
+
 class TCPMonitorType extends MonitorType {
     name = "port";
 
@@ -124,9 +149,11 @@ class TCPMonitorType extends MonitorType {
      */
     async checkTcp(monitor, heartbeat) {
         try {
-            const resp = await tcping(monitor.hostname, monitor.port);
-            heartbeat.ping = resp;
-            heartbeat.msg = `${resp} ms`;
+            const ms = monitor.bind_interface
+                ? await tcpingBound(monitor.hostname, monitor.port, monitor.bind_interface)
+                : await tcping(monitor.hostname, monitor.port);
+            heartbeat.ping = ms;
+            heartbeat.msg = `${ms} ms`;
             heartbeat.status = UP;
         } catch {
             throw new Error("Connection failed");
@@ -155,7 +182,12 @@ class TCPMonitorType extends MonitorType {
         return new Promise((resolve, reject) => {
             let dialogTimeout;
             let bannerTimeout;
-            const socket_ = net.connect(monitor.port, monitor.hostname);
+            const connOpts = {
+                port: monitor.port,
+                host: monitor.hostname,
+                ...(monitor.bind_interface ? { localAddress: monitor.bind_interface } : {}),
+            };
+            const socket_ = net.connect(connOpts);
 
             const onTimeout = () => {
                 log.debug(this.name, `[${monitor.name}] Pre-TLS connection timed out`);
@@ -241,6 +273,7 @@ class TCPMonitorType extends MonitorType {
                 port: monitor.port,
                 servername: monitor.hostname,
                 ...reuseSocket,
+                ...(monitor.bind_interface ? { localAddress: monitor.bind_interface } : {}),
             };
 
             const tlsInfoObject = await new Promise((resolve, reject) => {
@@ -295,6 +328,7 @@ class TCPMonitorType extends MonitorType {
             servername: monitor.hostname,
             rejectUnauthorized: !monitor.getIgnoreTls(),
             timeout: timeout,
+            ...(monitor.bind_interface ? { localAddress: monitor.bind_interface } : {}),
         };
 
         // Add client certificate if provided (for mTLS testing with cert)

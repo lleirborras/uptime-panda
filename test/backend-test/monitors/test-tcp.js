@@ -239,6 +239,53 @@ describe("TCP Monitor", () => {
         }, heartbeat);
     });
 
+    // ------------------------------------------------------------------
+    // bind_interface enforcement tests
+    // 192.0.2.1 is TEST-NET-1 (RFC 5737) — never assigned to a real NIC,
+    // so binding to it always produces EADDRNOTAVAIL.
+    // ------------------------------------------------------------------
+
+    test("check() succeeds when bind_interface matches a real local address (127.0.0.1)", async () => {
+        const server = await createTCPServer(0);
+        const port = server.address().port;
+
+        const tcpMonitor = new TCPMonitorType();
+        const monitor = {
+            hostname: "127.0.0.1",
+            port,
+            bind_interface: "127.0.0.1",
+            isEnabledExpiryNotification: () => false,
+        };
+        const heartbeat = { msg: "", status: PENDING };
+
+        try {
+            await tcpMonitor.check(monitor, heartbeat, {});
+            assert.strictEqual(heartbeat.status, UP);
+        } finally {
+            server.close();
+        }
+    });
+
+    test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
+        const server = await createTCPServer(0);
+        const port = server.address().port;
+
+        const tcpMonitor = new TCPMonitorType();
+        const monitor = {
+            hostname: "127.0.0.1",
+            port,
+            bind_interface: "192.0.2.1",
+            isEnabledExpiryNotification: () => false,
+        };
+        const heartbeat = { msg: "", status: PENDING };
+
+        try {
+            await assert.rejects(tcpMonitor.check(monitor, heartbeat, {}), /.+/);
+        } finally {
+            server.close();
+        }
+    });
+
     test("parseTlsAlertNumber() extracts alert number from error message", async () => {
         const { parseTlsAlertNumber } = require("../../../server/monitor-types/tcp");
 

@@ -133,5 +133,46 @@ describe(
                 await container.stop();
             }
         });
+
+        test("check() succeeds with bind_interface set to loopback (127.0.0.1)", async () => {
+            const { container, connectionString } = await createAndStartMariaDBContainer();
+
+            const mysqlMonitor = new MysqlMonitorType();
+            const monitor = {
+                // Replace container.getHost() ("localhost") with 127.0.0.1 to force IPv4 —
+                // on Linux, "localhost" may resolve to ::1 causing localAddress (IPv4) to be silently ignored
+                database_connection_string: connectionString.replace(container.getHost(), "127.0.0.1"),
+                conditions: "[]",
+                bind_interface: "127.0.0.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await mysqlMonitor.check(monitor, heartbeat, {});
+                assert.strictEqual(heartbeat.status, UP);
+            } finally {
+                await container.stop();
+            }
+        });
+
+        test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
+            const { container, connectionString } = await createAndStartMariaDBContainer();
+
+            const mysqlMonitor = new MysqlMonitorType();
+            const monitor = {
+                database_connection_string: connectionString.replace(container.getHost(), "127.0.0.1"),
+                conditions: "[]",
+                bind_interface: "192.0.2.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await assert.rejects(mysqlMonitor.check(monitor, heartbeat, {}), /.+/);
+            } finally {
+                await container.stop();
+            }
+        });
     }
 );

@@ -15,7 +15,9 @@ describe(
             // testcontainers v11 removed the default image; pass it explicitly
             const rabbitMQContainer = await new RabbitMQContainer("rabbitmq:3-management").withStartupTimeout(60000).start();
             const rabbitMQMonitor = new RabbitMqMonitorType();
-            const connectionString = `http://${rabbitMQContainer.getHost()}:${rabbitMQContainer.getMappedPort(15672)}`;
+            // Use 127.0.0.1 explicitly — getHost() may return "localhost" which resolves to
+            // ::1 on Linux, causing http.Agent localAddress (IPv4) to bind to an IPv6 socket (EINVAL)
+            const connectionString = `http://127.0.0.1:${rabbitMQContainer.getMappedPort(15672)}`;
 
             const monitor = {
                 rabbitmq_nodes: JSON.stringify([connectionString]),
@@ -61,7 +63,9 @@ describe(
         test("checkSingleNode() succeeds when node is healthy", async () => {
             const rabbitMQContainer = await new RabbitMQContainer("rabbitmq:3-management").withStartupTimeout(60000).start();
             const rabbitMQMonitor = new RabbitMqMonitorType();
-            const connectionString = `http://${rabbitMQContainer.getHost()}:${rabbitMQContainer.getMappedPort(15672)}`;
+            // Use 127.0.0.1 explicitly — getHost() may return "localhost" which resolves to
+            // ::1 on Linux, causing http.Agent localAddress (IPv4) to bind to an IPv6 socket (EINVAL)
+            const connectionString = `http://127.0.0.1:${rabbitMQContainer.getMappedPort(15672)}`;
 
             const monitor = {
                 name: "Test Monitor",
@@ -89,6 +93,55 @@ describe(
 
             // Should reject with any error (connection refused, timeout, etc.)
             await assert.rejects(rabbitMQMonitor.checkSingleNode(monitor, "http://localhost:15672", "1/1"), Error);
+        });
+
+        test("check() succeeds with bind_interface set to loopback (127.0.0.1)", async () => {
+            const rabbitMQContainer = await new RabbitMQContainer("rabbitmq:3-management").withStartupTimeout(60000).start();
+            const rabbitMQMonitor = new RabbitMqMonitorType();
+            // Use 127.0.0.1 explicitly — getHost() may return "localhost" which resolves to
+            // ::1 on Linux, causing http.Agent localAddress (IPv4) to bind to an IPv6 socket (EINVAL)
+            const connectionString = `http://127.0.0.1:${rabbitMQContainer.getMappedPort(15672)}`;
+
+            const monitor = {
+                rabbitmq_nodes: JSON.stringify([connectionString]),
+                rabbitmq_username: "guest",
+                rabbitmq_password: "guest",
+                timeout: 10,
+                bind_interface: "127.0.0.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await rabbitMQMonitor.check(monitor, heartbeat, {});
+                assert.strictEqual(heartbeat.status, UP);
+            } finally {
+                await rabbitMQContainer.stop();
+            }
+        });
+
+        test("check() rejects when bind_interface is an address not on this host (192.0.2.1)", async () => {
+            const rabbitMQContainer = await new RabbitMQContainer("rabbitmq:3-management").withStartupTimeout(60000).start();
+            const rabbitMQMonitor = new RabbitMqMonitorType();
+            // Use 127.0.0.1 explicitly — getHost() may return "localhost" which resolves to
+            // ::1 on Linux, causing http.Agent localAddress (IPv4) to bind to an IPv6 socket (EINVAL)
+            const connectionString = `http://127.0.0.1:${rabbitMQContainer.getMappedPort(15672)}`;
+
+            const monitor = {
+                rabbitmq_nodes: JSON.stringify([connectionString]),
+                rabbitmq_username: "guest",
+                rabbitmq_password: "guest",
+                timeout: 10,
+                bind_interface: "192.0.2.1",
+            };
+
+            const heartbeat = { msg: "", status: PENDING };
+
+            try {
+                await assert.rejects(rabbitMQMonitor.check(monitor, heartbeat, {}), /.+/);
+            } finally {
+                await rabbitMQContainer.stop();
+            }
         });
     }
 );

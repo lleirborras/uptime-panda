@@ -1,6 +1,7 @@
 const { MonitorType } = require("./monitor-type");
 const { log, UP } = require("../../src/util");
 const dayjs = require("dayjs");
+const net = require("net");
 const postgresConParse = require("pg-connection-string").parse;
 const { Client } = require("pg");
 
@@ -18,7 +19,7 @@ class PostgresMonitorType extends MonitorType {
         if (!query || (typeof query === "string" && query.trim() === "")) {
             query = "SELECT 1";
         }
-        await this.postgresQuery(monitor.database_connection_string, query);
+        await this.postgresQuery(monitor.database_connection_string, query, monitor.bind_interface);
 
         heartbeat.msg = "";
         heartbeat.status = UP;
@@ -29,12 +30,29 @@ class PostgresMonitorType extends MonitorType {
      * Run a query on Postgres
      * @param {string} connectionString The database connection string
      * @param {string} query The query to validate the database with
+     * @param {string} localAddress Local IP address to bind the outbound connection
      * @returns {Promise<(string[] | object[] | object)>} Response from
      * server
      */
-    async postgresQuery(connectionString, query) {
+    async postgresQuery(connectionString, query, localAddress = undefined) {
         return new Promise((resolve, reject) => {
             const config = postgresConParse(connectionString);
+
+            // pg does not expose localAddress natively; inject it by wrapping the
+            // socket factory so pg's internal connect() call receives localAddress.
+            if (localAddress) {
+                config.stream = () => {
+                    const socket = new net.Socket();
+                    const origConnect = socket.connect.bind(socket);
+                    socket.connect = (portOrOpts, host, cb) => {
+                        if (typeof portOrOpts === "object") {
+                            return origConnect({ ...portOrOpts, localAddress }, cb);
+                        }
+                        return origConnect({ port: portOrOpts, host, localAddress }, cb);
+                    };
+                    return socket;
+                };
+            }
 
             // Fix #3868, which true/false is not parsed to boolean
             if (typeof config.ssl === "string") {

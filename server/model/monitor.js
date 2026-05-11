@@ -229,6 +229,7 @@ class Monitor extends BaseModel {
             rabbitmqNodes: safeJsonParse(this.rabbitmq_nodes, [], "rabbitmq_nodes"),
             conditions: safeJsonParse(this.conditions, [], "conditions"),
             ipFamily: this.ip_family,
+            bindInterface: this.bind_interface,
             expectedTlsAlert: this.expected_tls_alert,
 
             // ping advanced options
@@ -558,18 +559,22 @@ class Monitor extends BaseModel {
                         agentFamily = 6;
                     }
 
+                    const localAddress = this.bind_interface || undefined;
+
                     const httpsAgentOptions = {
                         maxCachedSessions: 0, // Use Custom agent to disable session reuse (https://github.com/nodejs/node/issues/3940)
                         rejectUnauthorized: !this.getIgnoreTls(),
                         secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,
                         autoSelectFamily: true,
                         ...(agentFamily ? { family: agentFamily } : {}),
+                        ...(localAddress ? { localAddress } : {}),
                     };
 
                     const httpAgentOptions = {
                         maxCachedSessions: 0,
                         autoSelectFamily: true,
                         ...(agentFamily ? { family: agentFamily } : {}),
+                        ...(localAddress ? { localAddress } : {}),
                     };
 
                     log.debug("monitor", `[${this.name}] Prepare Options for axios`);
@@ -770,7 +775,7 @@ class Monitor extends BaseModel {
                     bean.ping = await ping(
                         this.hostname,
                         this.ping_count,
-                        "",
+                        this.bind_interface || "",
                         this.ping_numeric,
                         this.packet_size,
                         this.timeout,
@@ -1899,6 +1904,13 @@ class Monitor extends BaseModel {
                 throw new Error(`Invalid JSON in database query: ${error.message}`);
             }
         }
+
+        if (this.bind_interface) {
+            const net = require("net");
+            if (!net.isIP(this.bind_interface)) {
+                throw new Error("bind_interface must be a valid IP address");
+            }
+        }
     }
 
     /**
@@ -2238,7 +2250,7 @@ class Monitor extends BaseModel {
      * Cycle-safe via a `seen` set.
      * @param {number} monitorID Starting monitor ID
      * @param {Map<number, {id: number, parent: number|null, active: number}>} byID adjacency map
-     * @returns {boolean}
+     * @returns {boolean} True if all parent monitors are active, false otherwise
      */
     static isParentActiveFromMap(monitorID, byID) {
         const seen = new Set();

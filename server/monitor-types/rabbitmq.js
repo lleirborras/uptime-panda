@@ -2,6 +2,8 @@ const { MonitorType } = require("./monitor-type");
 const { log, UP } = require("../../src/util");
 const { axiosAbortSignal } = require("../util-server");
 const axios = require("axios");
+const http = require("http");
+const https = require("https");
 
 class RabbitMqMonitorType extends MonitorType {
     name = "rabbitmq";
@@ -61,9 +63,10 @@ class RabbitMqMonitorType extends MonitorType {
             normalizedUrl += "/";
         }
 
+        const targetUrl = new URL("api/health/checks/alarms/", normalizedUrl).href;
         const options = {
             // Do not start with slash, it will strip the trailing slash from baseUrl
-            url: new URL("api/health/checks/alarms/", normalizedUrl).href,
+            url: targetUrl,
             method: "get",
             timeout: monitor.timeout * 1000,
             headers: {
@@ -78,6 +81,14 @@ class RabbitMqMonitorType extends MonitorType {
             // Capture reason for 503 status
             validateStatus: (status) => status === 200 || status === 503,
         };
+
+        if (monitor.bind_interface) {
+            if (targetUrl.startsWith("https://")) {
+                options.httpsAgent = new https.Agent({ localAddress: monitor.bind_interface });
+            } else {
+                options.httpAgent = new http.Agent({ localAddress: monitor.bind_interface });
+            }
+        }
 
         log.debug("monitor", `[${monitor.name}] Checking node ${nodeInfo}: ${baseUrl}`);
 

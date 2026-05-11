@@ -2,6 +2,8 @@ const { MonitorType } = require("./monitor-type");
 const WebSocket = require("ws");
 const { UP } = require("../../src/util");
 const { checkStatusCode, getOidcTokenClientCredentials } = require("../util-server");
+const http = require("http");
+const https = require("https");
 // Define closing error codes https://www.iana.org/assignments/websocket/websocket.xml#close-code-number
 const WS_ERR_CODE = {
     1002: "Protocol error",
@@ -104,6 +106,13 @@ class WebSocketMonitorType extends MonitorType {
                 options.ca = monitor.tls_ca;
             }
             options.rejectUnauthorized = !monitor.getIgnoreTls();
+        }
+
+        if (monitor.bind_interface) {
+            const isSecure = (monitor.url || "").startsWith("wss://");
+            options.agent = isSecure
+                ? new https.Agent({ localAddress: monitor.bind_interface })
+                : new http.Agent({ localAddress: monitor.bind_interface });
         }
 
         return options;
